@@ -1,0 +1,20 @@
+{
+  "name": "phaser",
+  "version": "0.0.1",
+  "description": "fun games",
+  "main": "server.js",
+  "engines": {
+    "node": "8.9.1",
+    "npm": "5.5.1"
+  },
+  "dependencies": {
+    "express": "^4.16.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "Thomas 'eZam' Sanctorum",
+  "license": "ISC"
+}
