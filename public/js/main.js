@@ -95,16 +95,16 @@ var GameState = {
         this.updateInfo();
 
         if(this.cursors.right.isDown && this.player.x + this.player.width < this.game.world.width / 2){
-            this.player.animations.play('run');             
+            if (this.player.body.touching.down) this.player.animations.play('run');             
             this.player.body.velocity.x = 200;
         }
         else if (this.cursors.left.isDown){
-            this.player.animations.play('forward');
+            if (this.player.body.touching.down) this.player.animations.play('forward');
             this.player.body.velocity.x = -170;
         }
-        else if(this.player.body.touching.down){
+        else {
             this.player.body.velocity.x = 0;
-            this.player.animations.play('run'); 
+            if (this.player.body.touching.down) this.player.animations.play('run'); 
         }
     },
     render : function(){
