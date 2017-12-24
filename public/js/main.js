@@ -7,7 +7,7 @@ var GameState = {
         this.game.load.atlas('samourai', 'img/samourai.png', 'data/samourai.json');
 
         this.game.load.image('background', 'img/background.png');
-        this.game.load.image('rolling_barrel', 'img/roll.png');
+        this.game.load.image('rolling_barrel', 'img/rolling_barrel.png');
         this.game.load.image('crate', 'img/crate.png');
         this.game.load.image('bottle_crate', 'img/bottle_crate.png');
         this.game.load.image('gold_crate', 'img/gold_crate.png');
@@ -128,12 +128,12 @@ var GameState = {
     },
 
     updateInfo: function (){
-        this.lifeText.text = 'Life : ' + this.playerState.life;
-        this.scoreText.text = 'Score : ' + this.score;
-        this.blueBottleText.text = '- blue : ' + this.playerState.bottleStock.blue;
-        this.greenBottleText.text = '- green : ' + this.playerState.bottleStock.green;
-        this.redBottleText.text = '- red : ' + this.playerState.bottleStock.red;
-        this.yellowBottleText.text = '- yellow : ' + this.playerState.bottleStock.yellow;
+        this.scoreText.text = 'Score (' + this.scoreMultiplicateur + '): ' + this.score; 
+        this.lifeText.text = 'Life : ' + this.playerState.life + '/' + this.playerState.maxLife;
+        this.blueBottleText.text = '- blue : ' + this.playerState.bottleStock.blue +'/5';
+        this.greenBottleText.text = '- green : ' + this.playerState.bottleStock.green +'/5';
+        this.redBottleText.text = '- red : ' + this.playerState.bottleStock.red +'/5';
+        this.yellowBottleText.text = '- yellow : ' + this.playerState.bottleStock.yellow +'/5';
     },
 
     genPlayer: function(){
@@ -172,9 +172,10 @@ var GameState = {
 
         for(let i = 0; i < rand; i++ ){
             obj = this.loots.create(x + 80 + (20 * i), y +  Math.floor(Math.random() * 32) + 1, 'ring');
-            obj.body.velocity.x = -200;
+            obj.body.velocity.x =  this.scrollingVelocity;
             obj.body.gravity.y = 1000;
             obj.body.bounce.setTo(.5);
+
             obj.body.collideWorldBounds = true;
             obj.checkWorldBounds = true;
             obj.outOfBoundsKill = true;
@@ -200,7 +201,7 @@ var GameState = {
             obj.color = 'yellow';
         }
 
-        obj.body.velocity.x = -300;
+        obj.body.velocity.x =  this.scrollingVelocity;
         obj.body.gravity.y = 1000;
         obj.body.bounce.setTo(.5);
         obj.body.collideWorldBounds = true;
@@ -210,14 +211,22 @@ var GameState = {
 
     hitBottle: function(_player, _bottle){
         this.playerState.bottleStock[_bottle.color] += 1;
-        if(this.playerState.bottleStock.green == 5){
-            this.playerState.life = this.playerState.maxLife;
+        if(this.playerState.bottleStock.green == 5 && this.playerState.life < this.playerState.maxLife){
+            this.playerState.life += 1 ;
             this.playerState.bottleStock.green = 0;
         }
-
-        else if(this.playerState.bottleStock.yellow == 5){
-            this.scoreMultiplicateur += 1;
+        else if (this.playerState.bottleStock.red == 5){
+            this.playerState.life = this.playerState.maxLife;
+            this.playerState.bottleStock.red = 0;
+        }
+        else if(this.playerState.bottleStock.yellow == 5){            
+            this.playerState.maxLife += 1;
+            this.playerState.life = this.playerState.maxLife;
             this.playerState.bottleStock.yellow = 0;
+        }
+        else if(this.playerState.bottleStock.blue == 5){
+            this.scoreMultiplicateur += 1;
+            this.playerState.bottleStock.blue = 0;
         }
         _bottle.kill();
     },
