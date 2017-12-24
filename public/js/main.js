@@ -102,7 +102,7 @@ var GameState = {
             this.player.animations.play('forward');
             this.player.body.velocity.x = -170;
         }
-        else {
+        else if(this.player.body.touching.down){
             this.player.body.velocity.x = 0;
             this.player.animations.play('run'); 
         }
