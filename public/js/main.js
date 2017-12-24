@@ -7,7 +7,7 @@ var GameState = {
         this.game.load.atlas('samourai', 'img/samourai.png', 'data/samourai.json');
 
         this.game.load.image('background', 'img/background.png');
-        this.game.load.image('roll', 'img/roll.png');
+        this.game.load.image('rolling_barrel', 'img/roll.png');
         this.game.load.image('crate', 'img/crate.png');
         this.game.load.image('bottle_crate', 'img/bottle_crate.png');
         this.game.load.image('gold_crate', 'img/gold_crate.png');
@@ -83,6 +83,8 @@ var GameState = {
         this.game.physics.arcade.collide(this.loots, this.floors);
         this.game.physics.arcade.collide(this.bottles, this.floors);
         this.game.physics.arcade.collide(this.crates, this.floors);
+        this.game.physics.arcade.collide(this.bottlesCrates, this.floors);
+        this.game.physics.arcade.collide(this.coinCrates, this.floors);
         this.game.physics.arcade.collide(this.player, this.crates, this.hitCrate, null, this);
         this.game.physics.arcade.collide(this.player, this.bottleCrates, this.hitBottleCrate, null, this);
         this.game.physics.arcade.collide(this.player, this.coinCrates, this.hitCoinCrate, null, this);
@@ -91,22 +93,22 @@ var GameState = {
         this.bg.tilePosition.x -= 0.75;
 
         this.updateInfo();
-        if(this.player.body.touching.down || this.player.body.blocked.down){
-            this.player.animations.play('run'); 
-        }
 
         if(this.cursors.right.isDown && this.player.x + this.player.width < this.game.world.width / 2){
+            this.player.animations.play('run');             
             this.player.body.velocity.x = 200;
         }
         else if (this.cursors.left.isDown){
+            this.player.animations.play('forward');
             this.player.body.velocity.x = -170;
         }
         else {
             this.player.body.velocity.x = 0;
+            this.player.animations.play('run'); 
         }
     },
     render : function(){
-        game.debug.body(this.player);
+        // game.debug.body(this.player);
     },
     // ---- Function ---- //
   
@@ -135,7 +137,7 @@ var GameState = {
     },
 
     genPlayer: function(){
-        let obj = this.game.add.sprite(100, this.game.world.height - 128, 'samourai');
+        let obj = this.game.add.sprite(100, this.game.world.height - 180, 'samourai');
         this.playerState = {
             life : 3,
             maxLife : 3,
@@ -147,14 +149,16 @@ var GameState = {
             }
         };
         this.game.physics.arcade.enable(obj);
-        obj.width = 80; obj.height = 80;
-        obj.body.setSize(400, 500, 180);
+        obj.scale.setTo(0.2);
+        obj.body.setSize(330, 465, 250, 40);
         obj.inputEnabled = true;
         obj.body.collideWorldBounds = true;
 
         obj.body.gravity.y = 1200;
         // -- Animation -- //
         obj.animations.add('run', Phaser.Animation.generateFrameNames('Run_', 0, 7, '', 3), 30, false);
+        obj.animations.add('forward', Phaser.Animation.generateFrameNames('Run_', 0, 7, '', 3).reverse(), 30, false);
+        
         obj.animations.add('jump', ['JumpUP'], 15, false);
         obj.animations.add('fall', ['FallDown'], 15, false);
     
@@ -162,7 +166,7 @@ var GameState = {
     },
 
     addCoin: function(x, y){
-        let rand = Math.floor(Math.random() * 5) + 1;
+        let rand = 5 + Math.floor(Math.random() * 5) + 1;
         let obj;
         this.coinSound.play();
 
@@ -219,6 +223,7 @@ var GameState = {
     },
 
     hitCoin: function(_player, _coin){
+        this.coinSound.play();   
         _coin.kill();
         this.score += (1 * this.scoreMultiplicateur);
     },
@@ -245,7 +250,7 @@ var GameState = {
         }
 
         else if(pileFace >= 3){
-            obj = this.crates.create(this.game.width, posY - value, 'roll');
+            obj = this.crates.create(this.game.width, posY - value, 'rolling_barrel');
             obj.body.bounce.set(Math.random());
             obj.body.gravity.y = 200;
         }
