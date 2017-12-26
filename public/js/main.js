@@ -151,11 +151,7 @@ var GameState = {
             if (this.player.body.touching.down) this.player.animations.play('run'); 
         }
     },
-    render : function(){
-        // game.debug.body(this.player);
-    },
-
-
+    
     // ---- Function ---- 
     // -- generator & miscellanous
     restart: function(){
