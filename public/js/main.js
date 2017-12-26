@@ -17,7 +17,11 @@ var GameState = {
         this.game.load.image('yellow_flask', 'img/flask-yellow.png');
         this.game.load.image('ring', 'img/ring.png');
         this.game.load.image('grass', 'img/grass.png');
-
+        this.game.load.spritesheet('lifeBar', 'img/lifeBar.png', 16, 32);
+        this.game.load.spritesheet('green_jar', 'img/green_jar.png', 32, 32);
+        this.game.load.spritesheet('red_jar', 'img/red_jar.png', 32, 32);
+        this.game.load.spritesheet('yellow_jar', 'img/yellow_jar.png', 32, 32);
+        this.game.load.spritesheet('blue_jar', 'img/blue_jar.png', 32, 32);
         this.game.load.audio('taiko', 'audio/taiko-drums.ogg');
         this.game.load.audio('jump', 'audio/jump.wav');
         this.game.load.audio('coin', 'audio/coin.wav');
@@ -45,13 +49,13 @@ var GameState = {
         this.game.physics.enable(this.floors, Phaser.Physics.ARCADE);
         this.floors.enableBody = true;
         this.floors.body.immovable = true;
-        this.scoreText = this.game.add.text(16, 0, '', { fontSize: '32px', fill: '#000' });
-        this.lifeText = this.game.add.text(16, 32, '', { fontSize: '32px', fill: '#000' });
-        this.game.add.text(16, 60, 'Potions :', { fontSize: '32px', fill: '#000' })
-        this.blueBottleText = this.game.add.text(16, 96, '', { fontSize: '32px', fill: '#000' });
-        this.greenBottleText = this.game.add.text(16, 128, '', { fontSize: '32px', fill: '#000' });
-        this.redBottleText = this.game.add.text(16, 160, '', { fontSize: '32px', fill: '#000' });
-        this.yellowBottleText = this.game.add.text(16, 192, '', { fontSize: '32px', fill: '#000' });
+
+        this.scoreText = this.game.add.text(this.game.world.width / 2, 16, '', { fontSize: '32px', fill: '#000' });
+        this.scoreText.anchor.setTo(.5, 0);
+        this.blue_jar = this.game.add.sprite(this.game.world.width - 192, 16, 'blue_jar');
+        this.green_jar = this.game.add.sprite(this.game.world.width - 144, 16, 'green_jar');     
+        this.red_jar = this.game.add.sprite(this.game.world.width - 96, 16, 'red_jar');
+        this.yellow_jar = this.game.add.sprite(this.game.world.width - 48, 16, 'yellow_jar');
 
         // -- GROUPS -- 
         // -- crates 
@@ -78,11 +82,23 @@ var GameState = {
 
         // -- function -- //
         this.player = this.genPlayer();
-
+        this.arrayLife = [];
+        for (let i = 0; i < this.playerState.maxLife; i++){
+            this.arrayLife[i] = this.game.add.sprite(16 + ( i * 24 ), 16, 'lifeBar');
+        }
         // ---- EVENTS ---- //
         var spaceKey = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
         spaceKey.onDown.add(this.jump, this);
-       
+
+        var key1 = game.input.keyboard.addKey(Phaser.Keyboard.ONE);
+        key1.onDown.add(this.useBottle, this);
+    
+        var key2 = game.input.keyboard.addKey(Phaser.Keyboard.TWO);
+        key2.onDown.add(this.useBottle, this);
+    
+        var key3 = game.input.keyboard.addKey(Phaser.Keyboard.THREE);
+        key3.onDown.add(this.useBottle, this);
+
         this.timer = game.time.events.loop(1750, this.generateObstacle, this); 
      },
 
@@ -93,7 +109,7 @@ var GameState = {
         this.game.physics.arcade.collide(this.floors, this.bottles);
         this.game.physics.arcade.collide(this.floors, this.crates);
         this.game.physics.arcade.collide(this.floors, this.coinCrates);
-        this.game.physics.arcade.collide(this.floors, this.bottlesCrates);
+        this.game.physics.arcade.collide(this.floors, this.bottleCrates);
         this.game.physics.arcade.collide(this.floors, this.barrels);
        
         // -- coin collide crates & barrels
@@ -104,7 +120,7 @@ var GameState = {
         // -- barrels collide
         this.game.physics.arcade.collide(this.barrels, this.crates, this.breakBoth, null, this);
         this.game.physics.arcade.collide(this.barrels, this.coinCrates, this.breakBoth, null, this);
-        this.game.physics.arcade.collide(this.barrels, this.bottlesCrates, this.breakBoth, null, this);
+        this.game.physics.arcade.collide(this.barrels, this.bottleCrates, this.breakBoth, null, this);
         this.game.physics.arcade.collide(this.barrels, this.barrels, this.breakBoth, null, this);
 
         // -- player collide
@@ -142,6 +158,11 @@ var GameState = {
 
     // ---- Function ---- 
     // -- generator & miscellanous
+    restart: function(){
+        this.themeMusic.stop();
+        this.game.state.start('this.gameState');
+    },
+
     createFloor : function(){
         let obj;
         for(let i = 0; i < this.game.world.width; i += 64){  
@@ -158,12 +179,14 @@ var GameState = {
     },
 
     updateInfo: function (){
-        this.scoreText.text = 'Score (' + this.scoreMultiplicateur + '): ' + this.score; 
-        this.lifeText.text = 'Life : ' + this.playerState.life + '/' + this.playerState.maxLife;
-        this.blueBottleText.text = '- blue : ' + this.playerState.bottleStock.blue + '/' + this.playerState.bottleStockMax;
-        this.greenBottleText.text = '- green : ' + this.playerState.bottleStock.green  + '/' + this.playerState.bottleStockMax;
-        this.redBottleText.text = '- red : ' + this.playerState.bottleStock.red  + '/' + this.playerState.bottleStockMax;
-        this.yellowBottleText.text = '- yellow : ' + this.playerState.bottleStock.yellow + '/' + this.playerState.bottleStockMax;
+        this.scoreText.text = this.score;
+        for(let i = 0; i < this.arrayLife.length; i++){
+            this.arrayLife[i].frame = i + 1 <= this.playerState.life ? 0 : 1;
+        }
+        this.green_jar.frame = this.playerState.bottleStock.green
+        this.red_jar.frame = this.playerState.bottleStock.red
+        this.blue_jar.frame = this.playerState.bottleStock.blue
+        this.yellow_jar.frame = this.playerState.bottleStock.yellow
     },
 
     generateObstacle: function(){
@@ -171,11 +194,34 @@ var GameState = {
         if( seed < 8){
             this.addCrate();
         }
-
         else if(seed >= 8 && seed != 10 ){
             this.addBarrels();
         }
+    },
 
+    useBottle : function(_bottle) {
+        if(_bottle.keyCode == 49){
+            if(this.playerState.bottleStock.green == this.playerState.bottleStockMax && this.playerState.life < this.playerState.maxLife){
+                this.playerState.life += 1 ;
+                this.playerState.bottleStock.green = 0;
+            }
+        }
+
+        else if(_bottle.keyCode == 50){
+            if (this.playerState.bottleStock.red == this.playerState.bottleStockMax && this.playerState.life < this.playerState.maxLife ){
+                this.playerState.life = this.playerState.maxLife;
+                this.playerState.bottleStock.red = 0;
+            }
+        }
+
+        else if(_bottle.keyCode == 51){
+            if(this.playerState.bottleStock.yellow == this.playerState.bottleStockMax){            
+                this.playerState.maxLife += 1;
+                this.arrayLife[this.arrayLife.length] = this.game.add.sprite(16 + ( this.arrayLife.length * 24 ), 16, 'lifeBar');
+                this.playerState.life = this.playerState.maxLife;
+                this.playerState.bottleStock.yellow = 0;
+            }
+        }
     },
 
     // -- adding
@@ -287,6 +333,7 @@ var GameState = {
     },
 
     // -- HITTER
+
     breakBoth: function(_one, _two){
         _one.kill();
         _two.kill();
@@ -300,7 +347,7 @@ var GameState = {
             
             if(this.playerState.life <= 0) {
                 this.playerState.life = 0;
-                this.game.state.start('this.gameState');
+                this.restart();
             } else {
                 _crate.kill();
             }
@@ -341,7 +388,7 @@ var GameState = {
             
             if(this.playerState.life <= 0) {
                 this.playerState.life = 0;
-                this.game.state.start('this.gameState');
+                this.restart();
             } else {
                 _barrel.kill();
             }
@@ -349,23 +396,31 @@ var GameState = {
     },
 
     hitBottle: function(_player, _bottle){
-        this.playerState.bottleStock[_bottle.color] += 1;
-        if(this.playerState.bottleStock.green == this.playerState.bottleStockMax && this.playerState.life < this.playerState.maxLife){
-            this.playerState.life += 1 ;
-            this.playerState.bottleStock.green = 0;
-        }
-        else if (this.playerState.bottleStock.red == this.playerState.bottleStockMax){
-            this.playerState.life = this.playerState.maxLife;
-            this.playerState.bottleStock.red = 0;
-        }
-        else if(this.playerState.bottleStock.yellow == this.playerState.bottleStockMax){            
-            this.playerState.maxLife += 1;
-            this.playerState.life = this.playerState.maxLife;
-            this.playerState.bottleStock.yellow = 0;
-        }
-        else if(this.playerState.bottleStock.blue == this.playerState.bottleStockMax){
-            this.scoreMultiplicateur += 1;
-            this.playerState.bottleStock.blue = 0;
+        switch(_bottle.color){
+            case 'green':
+                if(this.playerState.bottleStock.green < this.playerState.bottleStockMax){  
+                    this.playerState.bottleStock.green += 1;
+                }
+                break;
+            case 'red':
+                if(this.playerState.bottleStock.red < this.playerState.bottleStockMax){  
+                    this.playerState.bottleStock.red += 1;
+                }
+                break;
+            case 'yellow':
+                if(this.playerState.bottleStock.yellow < this.playerState.bottleStockMax){  
+                    this.playerState.bottleStock.yellow += 1;
+                }
+                break;
+            case 'blue':
+                if(this.playerState.bottleStock.blue < this.playerState.bottleStockMax) {  
+                    this.playerState.bottleStock.blue += 1;
+                } 
+                if(this.playerState.bottleStock.blue == this.playerState.bottleStockMax) {
+                    this.scoreMultiplicateur += 1;
+                    this.playerState.bottleStock.blue = 0;
+                }
+                break;
         }
         _bottle.kill();
     },
