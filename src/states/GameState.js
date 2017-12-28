@@ -334,7 +334,7 @@ class GameState extends Phaser.State {
                     _player.bottleStock.blue += 1;
                 } 
                 if( _player.bottleStock.blue ==  _player.bottleStock.max) {
-                    _player.scoreMultiplicateur += 1;
+                    this.scoreMultiplicateur += 1;
                     _player.bottleStock.blue = 0;
                 }
                 break;

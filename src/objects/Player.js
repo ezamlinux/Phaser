@@ -53,8 +53,8 @@ class Player extends Phaser.Sprite {
     useBottle(_bottle) {
         if(_bottle.keyCode == 49){
             if(this.player.bottleStock.green == this.player.bottleStock.max && this.player.life < this.player.maxLife){
-                this.life += 1 ;
-                this.bottleStock.green = 0;
+                this.player.life += 1 ;
+                this.player.bottleStock.green = 0;
             }
         }
 
@@ -68,7 +68,7 @@ class Player extends Phaser.Sprite {
         else if(_bottle.keyCode == 51){
             if(this.player.bottleStock.yellow == this.player.bottleStock.max){            
                 this.player.maxLife += 1;
-                this.arrayLife[this.player.arrayLife.length] = this.game.add.sprite(16 + ( this.player.arrayLife.length * 24 ), 16, 'lifeBar');
+                this.arrayLife[this.arrayLife.length] = this.game.add.sprite(16 + ( this.arrayLife.length * 24 ), 16, 'lifeBar');
                 this.player.life = this.maxLife;
                 this.player.bottleStock.yellow = 0;
             }

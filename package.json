@@ -28,6 +28,7 @@
     "yargs": "^4.6.0"
   },
   "dependencies": {
+    "express": "^4.16.2",
     "phaser-ce": "^2.9.4"
   }
 }
