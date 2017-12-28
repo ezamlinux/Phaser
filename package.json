@@ -2,10 +2,9 @@
   "name": "phaser-game",
   "version": "0.5.0",
   "description": "Little game",
-  "main": "src/index.js",
   "scripts": {
-    "start": "gulp",
-    "production": "gulp --production"
+    "postinstall": "gulp",
+    "start": "node server.js"
   },
   "author": "Sanctorum Thomas",
   "license": "MIT",
