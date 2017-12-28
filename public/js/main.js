@@ -1,7 +1,82 @@
 var game = new Phaser.Game(800, 600, Phaser.AUTO);
 
+// --player
+class Player extends Phaser.Sprite{
+    constructor(game){
+        super(game, game.world.height - 180, 64, 'samourai');   
+        game.physics.arcade.enable(this);
+        this.maxLife = 3;
+        this.life = this.maxLife;
+        this.bottleStock = {
+            blue : 0,
+            green : 0,
+            yellow : 0,
+            red : 0,
+            max : 3
+        }
+        this.inputEnabled = true;
+        this.scale.setTo(0.2);
+        this.body.setSize(330, 465, 250, 40);
+        this.body.collideWorldBounds = true;
+        this.body.gravity.y = 1200;
+        // -- Animation -- //
+        this.animations.add('run', Phaser.Animation.generateFrameNames('Run_', 0, 7, '', 3), 30, false);
+        this.animations.add('forward', Phaser.Animation.generateFrameNames('Run_', 0, 7, '', 3).reverse(), 30, false);
+        this.animations.add('jump', ['JumpUP'], 15, false);
+        this.animations.add('fall', ['FallDown'], 15, false);
+    }
+    idle() {
+        this.body.velocity.x = 0;
+        this.animations.play('run');
+    }
+    run(){
+        this.body.velocity.x = 200;
+        this.animations.play('run');
+    }
+    forward(){
+        this.body.velocity.x = -170;
+        this.animations.play('forward');
+    }
+
+    jump(){
+        if(this.body.blocked.down || this.body.touching.down){
+            this.animations.play('jump');    
+            this.jumpSound.play();
+            this.body.velocity.y = -500;
+        }
+    }
+
+    getDamage(_x){
+        this.life -= _x;
+    }
+
+    useBottle(_bottle) {
+        if(_bottle.keyCode == 49){
+            if(this.bottleStock.green == this.bottleStock.max && this.life < this.maxLife){
+                this.life += 1 ;
+                this.bottleStock.green = 0;
+            }
+        }
+
+        else if(_bottle.keyCode == 50){
+            if (this.bottleStock.red == this.bottleStock.max && this.life < this.maxLife ){
+                this.life = this.maxLife;
+                this.bottleStock.red = 0;
+            }
+        }
+
+        else if(_bottle.keyCode == 51){
+            if(this.bottleStock.yellow == this.bottleStock.max){            
+                this.maxLife += 1;
+                this.arrayLife[this.arrayLife.length] = this.game.add.sprite(16 + ( this.arrayLife.length * 24 ), 16, 'lifeBar');
+                this.life = this.maxLife;
+                this.bottleStock.yellow = 0;
+            }
+        }
+    }
+}
+// --- Phaser GameState
 var GameState = {
-    // ---- Phaser function ---- //
     preload : function() { 
         this.game.load.path = 'assets/';
         this.game.load.atlas('samourai', 'img/samourai.png', 'data/samourai.json');
@@ -36,9 +111,10 @@ var GameState = {
         this.game.physics.startSystem(Phaser.Physics.ARCADE);
         this.cursors = this.game.input.keyboard.createCursorKeys();
 
-        this.themeMusic = this.game.add.audio('taiko');
         this.jumpSound = this.game.add.audio('jump');
         this.coinSound = this.game.add.audio('coin');
+
+        this.themeMusic = this.game.add.audio('taiko');
         this.themeMusic.loop = true;
         this.themeMusic.play();
 
@@ -81,25 +157,27 @@ var GameState = {
         this.bottles.enableBody = true;
 
         // -- function -- //
-        this.player = this.genPlayer();
+        this.player = new Player(this.game);
+        this.game.add.existing(this.player);
         this.arrayLife = [];
-        for (let i = 0; i < this.playerState.maxLife; i++){
+
+        for (let i = 0; i < this.player.maxLife; i++){
             this.arrayLife[i] = this.game.add.sprite(16 + ( i * 24 ), 16, 'lifeBar');
         }
         // ---- EVENTS ---- //
         var spaceKey = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-        spaceKey.onDown.add(this.jump, this);
+        spaceKey.onDown.add(this.player.jump, this);
 
         var key1 = game.input.keyboard.addKey(Phaser.Keyboard.ONE);
-        key1.onDown.add(this.useBottle, this);
+        key1.onDown.add(this.player.useBottle, this);
     
         var key2 = game.input.keyboard.addKey(Phaser.Keyboard.TWO);
-        key2.onDown.add(this.useBottle, this);
+        key2.onDown.add(this.player.useBottle, this);
     
         var key3 = game.input.keyboard.addKey(Phaser.Keyboard.THREE);
-        key3.onDown.add(this.useBottle, this);
+        key3.onDown.add(this.player.useBottle, this);
 
-        this.timer = game.time.events.loop(1750, this.generateObstacle, this); 
+        this.timer = game.time.events.loop(1750, this.generateObstacle, this);
      },
 
     update : function() {
@@ -138,21 +216,21 @@ var GameState = {
 
         this.updateInfo();
         // -- player event
-        if(this.cursors.right.isDown && this.player.x + this.player.width < this.game.world.width){
-            if (this.player.body.touching.down) this.player.animations.play('run');             
-            this.player.body.velocity.x = 200;
+        if(this.cursors.right.isDown ){
+            if (this.player.body.touching.down) this.player.run();           
         }
         else if (this.cursors.left.isDown){
-            if (this.player.body.touching.down) this.player.animations.play('forward');
-            this.player.body.velocity.x = -170;
+            if (this.player.body.touching.down) this.player.forward();
         }
         else {
-            this.player.body.velocity.x = 0;
-            if (this.player.body.touching.down) this.player.animations.play('run'); 
+            if (this.player.body.touching.down) this.player.idle();
         }
     },
     
-    // ---- Function ---- 
+    // ------------------ //
+    // ---- Function ---- //
+    // ------------------ //
+
     // -- generator & miscellanous
     restart: function(){
         this.themeMusic.stop();
@@ -164,25 +242,17 @@ var GameState = {
         for(let i = 0; i < this.game.world.width; i += 64){  
             obj = this.floors.create(i, this.game.world.height - 64, 'grass');
         }
-    }, 
-
-    jump : function(){
-        if(this.player.body.blocked.down || this.player.body.touching.down){
-            this.player.animations.play('jump');    
-            this.jumpSound.play();
-            this.player.body.velocity.y = -500;
-        }
     },
 
     updateInfo: function (){
         this.scoreText.text = this.score;
         for(let i = 0; i < this.arrayLife.length; i++){
-            this.arrayLife[i].frame = i + 1 <= this.playerState.life ? 0 : 1;
+            this.arrayLife[i].frame = i + 1 <= this.player.life ? 0 : 1;
         }
-        this.green_jar.frame = this.playerState.bottleStock.green
-        this.red_jar.frame = this.playerState.bottleStock.red
-        this.blue_jar.frame = this.playerState.bottleStock.blue
-        this.yellow_jar.frame = this.playerState.bottleStock.yellow
+        this.green_jar.frame = this.player.bottleStock.green
+        this.red_jar.frame = this.player.bottleStock.red
+        this.blue_jar.frame = this.player.bottleStock.blue
+        this.yellow_jar.frame = this.player.bottleStock.yellow
     },
 
     generateObstacle: function(){
@@ -195,63 +265,8 @@ var GameState = {
         }
     },
 
-    useBottle : function(_bottle) {
-        if(_bottle.keyCode == 49){
-            if(this.playerState.bottleStock.green == this.playerState.bottleStockMax && this.playerState.life < this.playerState.maxLife){
-                this.playerState.life += 1 ;
-                this.playerState.bottleStock.green = 0;
-            }
-        }
-
-        else if(_bottle.keyCode == 50){
-            if (this.playerState.bottleStock.red == this.playerState.bottleStockMax && this.playerState.life < this.playerState.maxLife ){
-                this.playerState.life = this.playerState.maxLife;
-                this.playerState.bottleStock.red = 0;
-            }
-        }
-
-        else if(_bottle.keyCode == 51){
-            if(this.playerState.bottleStock.yellow == this.playerState.bottleStockMax){            
-                this.playerState.maxLife += 1;
-                this.arrayLife[this.arrayLife.length] = this.game.add.sprite(16 + ( this.arrayLife.length * 24 ), 16, 'lifeBar');
-                this.playerState.life = this.playerState.maxLife;
-                this.playerState.bottleStock.yellow = 0;
-            }
-        }
-    },
-
     // -- adding
-    genPlayer: function(){
-        let obj = this.game.add.sprite(100, this.game.world.height - 180, 'samourai');
-        this.playerState = {
-            life : 3,
-            maxLife : 3,
-            bottleStock : {
-                blue: 0,
-                green: 0,
-                yellow: 0,
-                red : 0
-            },
-            bottleStockMax : 3
-        };
-        this.game.physics.arcade.enable(obj);   
-        obj.inputEnabled = true;
-        obj.scale.setTo(0.2);
-        obj.body.setSize(330, 465, 250, 40);
-        obj.body.collideWorldBounds = true;
 
-        obj.body.gravity.y = 1200;
-
-        // -- Animation -- //
-        obj.animations.add('run', Phaser.Animation.generateFrameNames('Run_', 0, 7, '', 3), 30, false);
-        obj.animations.add('forward', Phaser.Animation.generateFrameNames('Run_', 0, 7, '', 3).reverse(), 30, false);
-        
-        obj.animations.add('jump', ['JumpUP'], 15, false);
-        obj.animations.add('fall', ['FallDown'], 15, false);
-    
-        return obj;
-    },
-    
     addBarrels: function(){
         let obj;
         
@@ -339,13 +354,10 @@ var GameState = {
         if(_player.body.touching.down && _crate.body.touching.up){
         }
         else{
-            this.playerState.life -= 1;
-            
-            if(this.playerState.life <= 0) {
-                this.playerState.life = 0;
+            _player.getDamage(1);
+            _crate.kill();
+            if(_player.life <= 0) {
                 this.restart();
-            } else {
-                _crate.kill();
             }
         }
     },
@@ -366,7 +378,6 @@ var GameState = {
         if(_player.body.touching.down && _crate.body.touching.up){
         }else {
             let posX = Math.floor(Math.random() * 64) + 1;
-
             this.addBottle(_crate.x + posX, _crate.y);
             _crate.kill();
         }
@@ -380,48 +391,44 @@ var GameState = {
             //     _barrel.accelaration = _player.accelaration;
             // }
         }else {
-            this.playerState.life -= 1;
-            
-            if(this.playerState.life <= 0) {
-                this.playerState.life = 0;
+            _player.getDamage(1);
+            _barrel.kill();
+            if(_player.life <= 0) {
                 this.restart();
-            } else {
-                _barrel.kill();
             }
         }
     },
-
-    hitBottle: function(_player, _bottle){
+    hitBottle(_player, _bottle){
         switch(_bottle.color){
             case 'green':
-                if(this.playerState.bottleStock.green < this.playerState.bottleStockMax){  
-                    this.playerState.bottleStock.green += 1;
+                if(_player.bottleStock.green < _player.bottleStock.max){  
+                    _player.bottleStock.green += 1;
                 }
                 break;
             case 'red':
-                if(this.playerState.bottleStock.red < this.playerState.bottleStockMax){  
-                    this.playerState.bottleStock.red += 1;
+                if(_player.bottleStock.red <  _player.bottleStock.max){  
+                    _player.bottleStock.red += 1;
                 }
                 break;
             case 'yellow':
-                if(this.playerState.bottleStock.yellow < this.playerState.bottleStockMax){  
-                    this.playerState.bottleStock.yellow += 1;
+                if( _player.bottleStock.yellow <  _player.bottleStock.max){  
+                    _player.bottleStock.yellow += 1;
                 }
                 break;
             case 'blue':
-                if(this.playerState.bottleStock.blue < this.playerState.bottleStockMax) {  
-                    this.playerState.bottleStock.blue += 1;
+                if( _player.bottleStock.blue <  _player.bottleStock.max) {  
+                    _player.bottleStock.blue += 1;
                 } 
-                if(this.playerState.bottleStock.blue == this.playerState.bottleStockMax) {
-                    this.scoreMultiplicateur += 1;
-                    this.playerState.bottleStock.blue = 0;
+                if( _player.bottleStock.blue ==  _player.bottleStock.max) {
+                    _player.scoreMultiplicateur += 1;
+                    _player.bottleStock.blue = 0;
                 }
                 break;
         }
         _bottle.kill();
     },
 
-    hitCoin: function(_player, _coin){
+    hitCoin(_player, _coin){
         this.coinSound.play();   
         _coin.kill();
         this.score += (1 * this.scoreMultiplicateur);

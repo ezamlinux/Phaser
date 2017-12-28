@@ -1,20 +1,30 @@
 {
-  "name": "phaser",
-  "version": "0.0.1",
-  "description": "fun games",
-  "main": "server.js",
-  "engines": {
-    "node": "8.9.1",
-    "npm": "5.5.1"
+  "name": "phaser-game",
+  "version": "0.5.0",
+  "description": "Little game",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "gulp",
+    "production": "gulp --production"
+  },
+  "author": "Sanctorum Thomas",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-preset-es2015": "^6.6.0",
+    "babelify": "^7.2.0",
+    "browser-sync": "^2.12.3",
+    "browserify": "^13.0.0",
+    "del": "^2.2.0",
+    "exorcist": "^0.4.0",
+    "gulp": "^3.9.1",
+    "gulp-buffer": "0.0.2",
+    "gulp-if": "^2.0.0",
+    "gulp-uglify": "^1.5.3",
+    "gulp-util": "^3.0.7",
+    "vinyl-source-stream": "^1.1.0",
+    "yargs": "^4.6.0"
   },
   "dependencies": {
-    "express": "^4.16.2"
-  },
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
-  },
-  "author": "Thomas 'eZam' Sanctorum",
-  "license": "ISC"
+    "phaser-ce": "^2.9.4"
+  }
 }
