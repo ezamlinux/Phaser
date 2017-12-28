@@ -1,7 +1,12 @@
+import Coin from './Coin';
+import Bottle from './Bottle';
+
 class Player extends Phaser.Sprite {
 	constructor(game){
-        super(game, game.world.height - 180, 64, 'samourai');   
-        this.game.physics.arcade.enable(this);
+        super(game, 32, game.world.height - 200, 'samourai');   
+
+        this.game.physics.arcade.enable(this);      
+        this.jumpSound = this.game.add.audio('jump');
         this.maxLife = 3;
         this.life = this.maxLife;
         this.bottleStock = {
@@ -25,24 +30,11 @@ class Player extends Phaser.Sprite {
         this.game.world.addChild(this);
     }
 
-    idle() {
-        this.body.velocity.x = 0;
-        this.animations.play('run');
-    }
-    run(){
-        this.body.velocity.x = 200;
-        this.animations.play('run');
-    }
-    forward(){
-        this.body.velocity.x = -170;
-        this.animations.play('forward');
-    }
-
     jump(){
-        if(this.player.body.blocked.down || this.player.body.touching.down){
-            this.player.animations.play('jump');     
-            this.player.body.velocity.y = -500; 
+        if(this.body.blocked.down || this.body.touching.down){    
             this.jumpSound.play();
+            this.animations.play('jump');     
+            this.body.velocity.y = -500; 
         }
     }
 
@@ -69,9 +61,65 @@ class Player extends Phaser.Sprite {
             if(this.player.bottleStock.yellow == this.player.bottleStock.max){            
                 this.player.maxLife += 1;
                 this.arrayLife[this.arrayLife.length] = this.game.add.sprite(16 + ( this.arrayLife.length * 24 ), 16, 'lifeBar');
-                this.player.life = this.maxLife;
+                this.player.life = this.player.maxLife;
                 this.player.bottleStock.yellow = 0;
             }
+        }
+    }
+
+    hitBottle(_player, _bottle){
+        switch(_bottle.color){
+            case 'green':
+                if(_player.bottleStock.green < _player.bottleStock.max){  
+                    _player.bottleStock.green += 1;
+                }
+                break;
+            case 'red':
+                if(_player.bottleStock.red <  _player.bottleStock.max){  
+                    _player.bottleStock.red += 1;
+                }
+                break;
+            case 'yellow':
+                if( _player.bottleStock.yellow <  _player.bottleStock.max){  
+                    _player.bottleStock.yellow += 1;
+                }
+                break;
+            case 'blue':
+                if( _player.bottleStock.blue <  _player.bottleStock.max) {  
+                    _player.bottleStock.blue += 1;
+                } 
+                if( _player.bottleStock.blue ==  _player.bottleStock.max) {
+                    this.scoreMultiplicateur += 1;
+                    _player.bottleStock.blue = 0;
+                }
+                break;
+        }
+        _bottle.onHit();
+    }
+
+    hitCoin(_player, _coin){
+        _coin.onHit();
+        this.score += (1 * this.scoreMultiplicateur);
+    }
+
+    hitCrate(_player, _crate){
+        if(_player.body.touching.down && _crate.body.touching.up){
+        }
+        else{
+            if(_crate.key == 'gold_crate'){
+                let rand =  Math.floor(Math.random() * 5) + 1;
+                for(let i = 0; i < rand; i++){ 
+                    this.addCoin(_crate.x  + 80 + (20 * i), _crate.y);
+                }
+            }else if(_crate.key == 'bottle_crate'){
+                this.addBottle(_crate.x, _crate.y);
+            }else {    
+                _player.getDamage(1);
+                if(_player.life <= 0) {
+                    this.restart();
+                }
+            }
+            _crate.onHit();
         }
     }
 }

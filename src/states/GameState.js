@@ -1,5 +1,7 @@
 import Player from 'objects/Player';
+import Crate from 'objects/Crate';
 import Bottle from 'objects/Bottle';
+import Coin from 'objects/Coin';
 
 class GameState extends Phaser.State {
 	preload() { 
@@ -37,9 +39,6 @@ class GameState extends Phaser.State {
         this.game.physics.startSystem(Phaser.Physics.ARCADE);
         this.cursors = this.game.input.keyboard.createCursorKeys();
 
-        this.jumpSound = this.game.add.audio('jump');
-        this.coinSound = this.game.add.audio('coin');
-
         this.themeMusic = this.game.add.audio('taiko');
         this.themeMusic.loop = true;
         this.themeMusic.play();
@@ -62,13 +61,8 @@ class GameState extends Phaser.State {
         // -- GROUPS -- 
         // -- crates 
         this.crates = this.game.add.group();
-        this.crates.enableBody = true;
-
         this.coinCrates = this.game.add.group();
-        this.coinCrates.enableBody = true;
-
         this.bottleCrates = this.game.add.group();
-        this.bottleCrates.enableBody = true;
 
         // -- barrels
         this.barrels = this.game.add.group();
@@ -76,11 +70,9 @@ class GameState extends Phaser.State {
 
         // -- coins
         this.coins = this.game.add.group();
-        this.coins.enableBody = true;
 
         // -- bottles
         this.bottles = this.game.add.group();
-        this.bottles.enableBody = true;
 
         // -- function -- //
         this.player = new Player(this.game);
@@ -91,7 +83,7 @@ class GameState extends Phaser.State {
         }
         // ---- EVENTS ---- //
         var spaceKey = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-        spaceKey.onDown.add(this.player.jump, this);
+        spaceKey.onDown.add(this.player.jump, this.player);
 
         var key1 = this.game.input.keyboard.addKey(Phaser.Keyboard.ONE);
         key1.onDown.add(this.player.useBottle, this);
@@ -114,11 +106,6 @@ class GameState extends Phaser.State {
         this.game.physics.arcade.collide(this.floors, this.coinCrates);
         this.game.physics.arcade.collide(this.floors, this.bottleCrates);
         this.game.physics.arcade.collide(this.floors, this.barrels);
-       
-        // -- coin collide crates & barrels
-        // this.game.physics.arcade.collide(this.coins, this.crates);
-        // this.game.physics.arcade.collide(this.coins, this.bottleCrates);
-        // this.game.physics.arcade.collide(this.coins, this.coinCrates);
 
         // -- barrels collide
         this.game.physics.arcade.collide(this.barrels, this.crates, this.breakBoth, null, this);
@@ -127,15 +114,14 @@ class GameState extends Phaser.State {
         this.game.physics.arcade.collide(this.barrels, this.barrels, this.breakBoth, null, this);
 
         // -- player collide
-        this.game.physics.arcade.collide(this.player, this.crates, this.hitCrate, null, this);
-        this.game.physics.arcade.collide(this.player, this.bottleCrates, this.hitBottleCrate, null, this);
-        this.game.physics.arcade.collide(this.player, this.coinCrates, this.hitCoinCrate, null, this);      
+        this.game.physics.arcade.collide(this.player, this.crates, this.player.hitCrate, null, this);
+        this.game.physics.arcade.collide(this.player, this.bottleCrates, this.player.hitCrate, null, this);
+        this.game.physics.arcade.collide(this.player, this.coinCrates, this.player.hitCrate, null, this);      
         this.game.physics.arcade.collide(this.player, this.barrels, this.hitBarrels, null, this);
-        this.game.physics.arcade.collide(this.player, this.coins, this.hitCoin, null, this);
-        this.game.physics.arcade.collide(this.player, this.bottles, this.hitBottle, null, this);
+        this.game.physics.arcade.collide(this.player, this.coins, this.player.hitCoin, null, this);
+        this.game.physics.arcade.collide(this.player, this.bottles, this.player.hitBottle, null, this);
 
         // -- animation
-        
         this.bg_sky.tilePosition.x -= 0.20;
         this.bg_mountain.tilePosition.x -= 1;
         this.floors.tilePosition.x -= 2.5;
@@ -144,15 +130,28 @@ class GameState extends Phaser.State {
         this.updateInfo();
         // -- player event
         if(this.cursors.right.isDown){
-			if (this.player.body.touching.down) this.player.run();
-			else this.player.body.velocity.x = 150
+			if (this.player.body.touching.down) {
+                this.player.animations.play('run');
+                this.player.body.velocity.x = 200;
+            }
+			else {
+                this.player.body.velocity.x = 150;
+            }
         }
         else if (this.cursors.left.isDown){
-			if (this.player.body.touching.down) this.player.forward();
-			else this.player.body.velocity.x = -120; 
+			if (this.player.body.touching.down){
+                this.player.animations.play('forward');
+                this.player.body.velocity.x = -150;
+            } 
+			else{
+                this.player.body.velocity.x = -120; 
+            } 
         }
         else {
-            if (this.player.body.touching.down) this.player.idle();
+            if (this.player.body.touching.down){            
+                this.player.animations.play('run');
+                this.player.body.velocity.x = 0;
+            }
         }
     }
     
@@ -212,93 +211,44 @@ class GameState extends Phaser.State {
     }
 
     addCrate(){
-        let obj;
-        
         let rand = Math.floor(Math.random() * 10) + 1;
         let posY = this.game.height - 128;  
         let value = Math.floor(Math.random() * 10) + 1 > 5 ? 96 : 0
         if(rand >= 9){
             let rand = Math.floor(Math.random() * 10) + 1
             if(rand >= 5){
-                obj = this.coinCrates.create(this.game.width, posY - value, 'gold_crate');   
+                new Crate(this.game, this.game.width, posY - value, 'gold_crate', this.coinCrates);   
             }
             else {
-                obj = this.bottleCrates.create(this.game.width, posY - value, 'bottle_crate');    
+                new Crate(this.game, this.game.width, posY - value, 'bottle_crate', this.bottleCrates);    
             }
         } else {
-                obj = this.crates.create(this.game.width, posY, 'crate');
+                 new Crate(this.game, this.game.width, posY, 'crate', this.crates);
         }
-        
-        obj.body.velocity.x = this.scrollingVelocity;
-        obj.checkWorldBounds = true;
-        obj.outOfBoundsKill = true;
     }
 
     addCoin(x, y){
-        this.coinSound.play();
-        let obj = this.coins.create(x , y , 'ring');
-                
-        obj.body.velocity.x = this.scrollingVelocity;
-        obj.body.gravity.y = 1000;
-        obj.body.bounce.setTo(.5);
-
-        obj.checkWorldBounds = true;
-        obj.outOfBoundsKill = true;
+        new Coin(this.game, x, y, this.coins);
     }
 
     addBottle(x, y){
-        let obj;
         let rand = Math.floor(Math.random() * 4) + 1;
        
         if(rand == 1){
-			obj = new Bottle(this.game, x, y, 'blue', this.bottles);
+			new Bottle(this.game, x, y, 'blue', this.bottles);
         } else if(rand == 2){
-            obj = new Bottle(this.game, x, y, 'red', this.bottles);
+            new Bottle(this.game, x, y, 'red', this.bottles);
         } else if(rand == 3){
-            obj = new Bottle(this.game, x, y, 'green', this.bottles);
+            new Bottle(this.game, x, y, 'green', this.bottles);
         } else {
-            obj = new Bottle(this.game, x, y, 'yellow', this.bottles);
+            new Bottle(this.game, x, y, 'yellow', this.bottles);
         }
     }
 
     // -- HITTER
-
     breakBoth(_one, _two){
         _one.kill();
         _two.kill();
-    }
-
-    hitCrate(_player, _crate){
-        if(_player.body.touching.down && _crate.body.touching.up){
-        }
-        else{
-            _player.getDamage(1);
-            _crate.kill();
-            if(_player.life <= 0) {
-                this.restart();
-            }
-        }
-    }
-
-    hitCoinCrate(_player, _crate){
-        if(_player.body.touching.down && _crate.body.touching.up){
-        }else {
-            let rand =  Math.floor(Math.random() * 5) + 1;
-            let posY = Math.floor(Math.random() * 32) + 1
-            for(let i = 0; i < rand; i++){ 
-                this.addCoin(_crate.x + 80 + (20 * i), _crate.y + posY);
-            }
-            _crate.kill();
-        }
-    }
-
-    hitBottleCrate(_player, _crate){
-        if(_player.body.touching.down && _crate.body.touching.up){
-        }else {
-            let posX = Math.floor(Math.random() * 64) + 1;
-            this.addBottle(_crate.x + posX, _crate.y);
-            _crate.kill();
-        }
     }
 
     hitBarrels(_player, _barrel){
@@ -311,42 +261,6 @@ class GameState extends Phaser.State {
             }
         }
 	}
-	
-    hitBottle(_player, _bottle){
-        switch(_bottle.color){
-            case 'green':
-                if(_player.bottleStock.green < _player.bottleStock.max){  
-                    _player.bottleStock.green += 1;
-                }
-                break;
-            case 'red':
-                if(_player.bottleStock.red <  _player.bottleStock.max){  
-                    _player.bottleStock.red += 1;
-                }
-                break;
-            case 'yellow':
-                if( _player.bottleStock.yellow <  _player.bottleStock.max){  
-                    _player.bottleStock.yellow += 1;
-                }
-                break;
-            case 'blue':
-                if( _player.bottleStock.blue <  _player.bottleStock.max) {  
-                    _player.bottleStock.blue += 1;
-                } 
-                if( _player.bottleStock.blue ==  _player.bottleStock.max) {
-                    this.scoreMultiplicateur += 1;
-                    _player.bottleStock.blue = 0;
-                }
-                break;
-        }
-        _bottle.kill();
-    }
-
-    hitCoin(_player, _coin){
-        this.coinSound.play();   
-        _coin.kill();
-        this.score += (1 * this.scoreMultiplicateur);
-    }
 }
 
 export default GameState;
