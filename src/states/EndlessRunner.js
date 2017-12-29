@@ -85,7 +85,9 @@ class EndlessRunner extends Phaser.State {
         // ---- EVENTS ---- //
         var spaceKey = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
         spaceKey.onDown.add(this.player.jump, this.player);
-
+        var key4 = this.game.input.keyboard.addKey(Phaser.Keyboard.UP);
+        key4.onDown.add(this.player.jump, this.player);
+        
         var key1 = this.game.input.keyboard.addKey(Phaser.Keyboard.ONE);
         key1.onDown.add(this.player.useBottle, this);
     
