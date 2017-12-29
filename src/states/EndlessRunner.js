@@ -1,5 +1,5 @@
 import Player from 'objects/Player';
-import Crate from 'objects/Crate';
+import RegularCrate from 'objects/RegularCrate';
 import BottleCrate from 'objects/BottleCrate';
 import CoinCrate from 'objects/CoinCrate';
 import Barrel from 'objects/Barrel';
@@ -215,7 +215,7 @@ class EndlessRunner extends Phaser.State {
                 new BottleCrate(this.game, this.game.width, posY - value, 'bottle_crate');    
             }
         } else {
-                new Crate(this.game, this.game.width, posY, 'crate');
+                new RegularCrate(this.game, this.game.width, posY, 'crate');
         }
     }
 
