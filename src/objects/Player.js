@@ -1,5 +1,4 @@
 import Coin from './Coin';
-import Bottle from './Bottle';
 
 class Player extends Phaser.Sprite {
 	constructor(game){
@@ -40,6 +39,10 @@ class Player extends Phaser.Sprite {
 
     getDamage(_x){
         this.life -= _x;
+        if(this.life == 0){
+            // infinite credits
+            this.game.state.start('menu');
+        }
     }
 
     useBottle(_bottle) {
@@ -100,27 +103,6 @@ class Player extends Phaser.Sprite {
     hitCoin(_player, _coin){
         _coin.onHit();
         this.score += (1 * this.scoreMultiplicateur);
-    }
-
-    hitCrate(_player, _crate){
-        if(_player.body.touching.down && _crate.body.touching.up){
-        }
-        else{
-            if(_crate.key == 'gold_crate'){
-                let rand =  Math.floor(Math.random() * 5) + 1;
-                for(let i = 0; i < rand; i++){ 
-                    this.addCoin(_crate.x  + 80 + (20 * i), _crate.y);
-                }
-            }else if(_crate.key == 'bottle_crate'){
-                this.addBottle(_crate.x, _crate.y);
-            }else {    
-                _player.getDamage(1);
-                if(_player.life <= 0) {
-                    this.restart();
-                }
-            }
-            _crate.onHit();
-        }
     }
 }
 

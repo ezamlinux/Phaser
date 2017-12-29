@@ -1,7 +1,8 @@
-class Coin extends Phaser.Sprite{
-    constructor(game, x, y, group){
-        super(game, x, y, 'ring');
+let group;
 
+class Coin extends Phaser.Sprite{
+    constructor(game, x, y){
+        super(game, x, y, 'ring');
         this.game.physics.arcade.enable(this);
         this.coinSound = this.game.add.audio('coin');
         this.coinSound.play();
@@ -10,8 +11,8 @@ class Coin extends Phaser.Sprite{
         this.body.bounce.setTo(.5);
         this.checkWorldBounds = true;
         this.outOfBoundsKill = true;
-        
-        group.add(this);
+
+        this.game.GLOBAL.coins.add(this);
     }
 
     onHit(){
