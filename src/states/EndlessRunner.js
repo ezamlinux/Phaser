@@ -40,9 +40,9 @@ class EndlessRunner extends Phaser.State {
         this.game.physics.startSystem(Phaser.Physics.ARCADE);
         this.cursors = this.game.input.keyboard.createCursorKeys();
 
-        this.themeMusic = this.game.add.audio('taiko');
-        this.themeMusic.loop = true;
-        this.themeMusic.play();
+        this.game.GLOBAL.themeMusic = this.game.add.audio('taiko');
+        this.game.GLOBAL.themeMusic.loop = true;
+        this.game.GLOBAL.themeMusic.play();
 
         this.game.stage.backgroundColor ="#000000";
         this.bg_sky = this.game.add.tileSprite(0, 0, this.game.world.width, this.game.world.height, 'sky');
@@ -87,7 +87,7 @@ class EndlessRunner extends Phaser.State {
         spaceKey.onDown.add(this.player.jump, this.player);
         var key4 = this.game.input.keyboard.addKey(Phaser.Keyboard.UP);
         key4.onDown.add(this.player.jump, this.player);
-        
+
         var key1 = this.game.input.keyboard.addKey(Phaser.Keyboard.ONE);
         key1.onDown.add(this.player.useBottle, this);
     
@@ -163,10 +163,6 @@ class EndlessRunner extends Phaser.State {
     // ------------------ //
 
     // -- generator & miscellanous
-    restart(){
-        this.themeMusic.stop();
-        this.game.state.start('menu');
-    }
 
     createFloor(){
         let obj;

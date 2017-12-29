@@ -19,10 +19,10 @@ class Menu extends Phaser.State{
         var rKey = this.game.input.keyboard.addKey(Phaser.Keyboard.R);
         rKey.onDown.addOnce(this.launchEndlessRunner, this);
 
-        this.themeMusic = this.game.add.audio('rain');
-        this.themeMusic.loop = true;
-        this.themeMusic.volume = 0.2;
-        this.themeMusic.play();
+        this.game.GLOBAL.themeMusic = this.game.add.audio('rain');
+        this.game.GLOBAL.themeMusic.loop = true;
+        this.game.GLOBAL.themeMusic.volume = 0.2;
+        this.game.GLOBAL.themeMusic.play();
     }
 
     update(){
@@ -31,7 +31,7 @@ class Menu extends Phaser.State{
     }
 
     launchEndlessRunner(){
-        this.themeMusic.stop();
+        this.game.GLOBAL.themeMusic.stop();
 		this.game.state.start('endlessRunner');
     }
 }

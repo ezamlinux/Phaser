@@ -41,6 +41,7 @@ class Player extends Phaser.Sprite {
         this.life -= _x;
         if(this.life == 0){
             // infinite credits
+            this.game.GLOBAL.themeMusic.stop();
             this.game.state.start('menu');
         }
     }
