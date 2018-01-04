@@ -7,7 +7,7 @@ import Barrel from 'objects/Barrel';
 class EndlessRunner extends Phaser.State {
 	preload() { 
 		this.game.load.path = 'assets/';
-        this.game.load.atlas('samourai', 'img/samourai.png', 'data/samourai.json');
+        this.game.load.atlas('samourai', 'img/player.png', 'data/player.json');
 
         this.game.load.image('sky', 'img/sky.png');
         this.game.load.image('mountain', 'img/mountain.png');
@@ -35,7 +35,7 @@ class EndlessRunner extends Phaser.State {
         // ---- global params ---- //
         this.score = 0;
         this.scoreMultiplicateur = 1;
-        this.scrollingVelocity = -250 ;
+        
         // ---- ----//
         this.game.physics.startSystem(Phaser.Physics.ARCADE);
         this.cursors = this.game.input.keyboard.createCursorKeys();

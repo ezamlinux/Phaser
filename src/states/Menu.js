@@ -5,7 +5,6 @@ class Menu extends Phaser.State{
         this.game.load.image('sky', 'img/sky.png');
         this.game.load.image('mountain', 'img/mountain.png');
         this.game.load.image('runnerButton', 'img/menu/runnerButton.png');
-
         this.game.load.audio('rain', 'audio/rain.wav');
     }
 
@@ -19,6 +18,7 @@ class Menu extends Phaser.State{
         var rKey = this.game.input.keyboard.addKey(Phaser.Keyboard.R);
         rKey.onDown.addOnce(this.launchEndlessRunner, this);
 
+
         this.game.GLOBAL.themeMusic = this.game.add.audio('rain');
         this.game.GLOBAL.themeMusic.loop = true;
         this.game.GLOBAL.themeMusic.volume = 0.2;
@@ -29,7 +29,7 @@ class Menu extends Phaser.State{
         this.bg_sky.tilePosition.x -= 0.20;
         this.bg_mountain.tilePosition.x -= 1;
     }
-
+    
     launchEndlessRunner(){
         this.game.GLOBAL.themeMusic.stop();
 		this.game.state.start('endlessRunner');
