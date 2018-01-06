@@ -852,7 +852,7 @@ var EndlessRunner = function (_Phaser$State) {
             this.game.load.image('mountain', 'img/mountain.png');
             this.game.load.image('rolling_barrel', 'img/rolling_barrel.png');
             this.game.load.spritesheet('flasks', 'img/Flasks.png', 24, 24);
-            this.game.load.spritesheet('crates', 'img/crates.png', 64, 64);
+            this.game.load.spritesheet('crates', 'img/Crates.png', 64, 64);
             this.game.load.image('ring', 'img/ring.png');
             this.game.load.image('grass', 'img/grass.png');
             this.game.load.spritesheet('lifeBar', 'img/lifeBar.png', 16, 32);
