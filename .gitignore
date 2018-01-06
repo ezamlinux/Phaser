@@ -5,3 +5,5 @@ static
 *.tmp
 n o d e _ m m o d u l e s  
  
+gulpfile.js
+gulpfile.md
