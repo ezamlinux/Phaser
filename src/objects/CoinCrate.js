@@ -2,9 +2,9 @@ import Crate from 'objects/Crate';
 import Coin from 'objects/Coin';
 
 class CoinCrate extends Crate{
-    constructor(game, x, y, img){
+    constructor(game, x, y){
         let group = game.GLOBAL.coinCrates;
-        super(game, x, y, img, group);
+        super(game, x, y, group, 2);
 
         this.body.onCollide = new Phaser.Signal();
         this.body.onCollide.add(this.onHit, this);

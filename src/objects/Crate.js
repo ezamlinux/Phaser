@@ -1,8 +1,9 @@
 class Crate extends Phaser.Sprite{
-    constructor(game, x, y , img, group){
-        super(game, x, y, img);
+    constructor(game, x, y, group, _frame){
+        super(game, x, y, 'crates');
 
         this.game.physics.arcade.enable(this);
+        this.frame = _frame;
         this.body.velocity.x = -200;
         this.checkWorldBounds = true;
         this.outOfBoundsKill = true;

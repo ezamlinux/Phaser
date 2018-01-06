@@ -1,10 +1,9 @@
 import Crate from 'objects/Crate'
 
 class RegularCrate extends Crate{
-    constructor(game, x, y, img){
+    constructor(game, x, y){
         let group = game.GLOBAL.crates;
-        super(game, x, y, img, group);
-
+        super(game, x, y, group, 0);
         this.body.onCollide = new Phaser.Signal();
         this.body.onCollide.add(this.onHit, this);
     }

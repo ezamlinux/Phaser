@@ -72,31 +72,33 @@ class Player extends Phaser.Sprite {
     }
 
     hitBottle(_player, _bottle){
-        switch(_bottle.color){
-            case 'green':
+        console.log(_bottle.frame);
+        switch(_bottle.frame){
+            case 0:
+                if( _player.bottleStock.blue <  _player.bottleStock.max) {  
+                    _player.bottleStock.blue += 1;
+                    if( _player.bottleStock.blue ==  _player.bottleStock.max) {
+                        this.scoreMultiplicateur += 1;
+                        _player.bottleStock.blue = 0;
+                    }
+                } 
+                break;
+            case 1:
                 if(_player.bottleStock.green < _player.bottleStock.max){  
                     _player.bottleStock.green += 1;
                 }
                 break;
-            case 'red':
+            case 2:
                 if(_player.bottleStock.red <  _player.bottleStock.max){  
                     _player.bottleStock.red += 1;
                 }
                 break;
-            case 'yellow':
+            case 3:
                 if( _player.bottleStock.yellow <  _player.bottleStock.max){  
                     _player.bottleStock.yellow += 1;
                 }
                 break;
-            case 'blue':
-                if( _player.bottleStock.blue <  _player.bottleStock.max) {  
-                    _player.bottleStock.blue += 1;
-                } 
-                if( _player.bottleStock.blue ==  _player.bottleStock.max) {
-                    this.scoreMultiplicateur += 1;
-                    _player.bottleStock.blue = 0;
-                }
-                break;
+
         }
         _bottle.onHit();
     }

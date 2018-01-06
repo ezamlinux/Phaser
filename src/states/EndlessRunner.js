@@ -12,13 +12,8 @@ class EndlessRunner extends Phaser.State {
         this.game.load.image('sky', 'img/sky.png');
         this.game.load.image('mountain', 'img/mountain.png');
         this.game.load.image('rolling_barrel', 'img/rolling_barrel.png');
-        this.game.load.image('crate', 'img/crate.png');
-        this.game.load.image('bottle_crate', 'img/bottle_crate.png');
-        this.game.load.image('gold_crate', 'img/gold_crate.png');
-        this.game.load.image('blue_flask', 'img/flask-blue.png');
-        this.game.load.image('red_flask', 'img/flask-red.png');
-        this.game.load.image('green_flask', 'img/flask-green.png');
-        this.game.load.image('yellow_flask', 'img/flask-yellow.png');
+        this.game.load.spritesheet('flasks', 'img/Flasks.png', 24, 24);
+        this.game.load.spritesheet('crates', 'img/crates.png', 64, 64);
         this.game.load.image('ring', 'img/ring.png');
         this.game.load.image('grass', 'img/grass.png');
         this.game.load.spritesheet('lifeBar', 'img/lifeBar.png', 16, 32);
@@ -207,13 +202,13 @@ class EndlessRunner extends Phaser.State {
         if(rand >= 9){
             let rand = Math.floor(Math.random() * 10) + 1
             if(rand >= 5){
-                new CoinCrate(this.game, this.game.width, posY - value, 'gold_crate'); 
+                new CoinCrate(this.game, this.game.width, posY - value); 
             }
             else {
-                new BottleCrate(this.game, this.game.width, posY - value, 'bottle_crate');    
+                new BottleCrate(this.game, this.game.width, posY - value);    
             }
         } else {
-                new RegularCrate(this.game, this.game.width, posY, 'crate');
+                new RegularCrate(this.game, this.game.width, posY);
         }
     }
 
