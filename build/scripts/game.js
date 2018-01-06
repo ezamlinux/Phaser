@@ -92,7 +92,7 @@ var Barrel = function (_Phaser$Sprite) {
     function Barrel(game, x, y, img) {
         _classCallCheck(this, Barrel);
 
-        var _this = _possibleConstructorReturn(this, (Barrel.__proto__ || Object.getPrototypeOf(Barrel)).call(this, game, x, y, img));
+        var _this = _possibleConstructorReturn(this, (Barrel.__proto__ || Object.getPrototypeOf(Barrel)).call(this, game, x, y, 'rolling_barrel'));
 
         _this.game.physics.arcade.enable(_this);
         _this.body.bounce.set(Math.random());
@@ -258,17 +258,10 @@ var BottleCrate = function (_Crate) {
         value: function onHit(_crate, _player) {
             if (_player.key == 'samourai') {
                 if (_player.body.touching.down && _crate.body.touching.up) {} else {
-                    var rand = Math.floor(Math.random() * 4) + 1;
+                    var rand = Math.floor(Math.random() * 4);
 
-                    if (rand == 1) {
-                        new _Bottle2.default(this.game, _crate.x, _crate.y, 0);
-                    } else if (rand == 2) {
-                        new _Bottle2.default(this.game, _crate.x, _crate.y, 2);
-                    } else if (rand == 3) {
-                        new _Bottle2.default(this.game, _crate.x, _crate.y, 1);
-                    } else {
-                        new _Bottle2.default(this.game, _crate.x, _crate.y, 3);
-                    }
+                    new _Bottle2.default(this.game, _crate.x, _crate.y, rand);
+
                     _crate.kill(_crate, _player);
                 }
             }
@@ -536,14 +529,6 @@ var _createClass = function () {
     };
 }();
 
-var _Coin = require('./Coin');
-
-var _Coin2 = _interopRequireDefault(_Coin);
-
-function _interopRequireDefault(obj) {
-    return obj && obj.__esModule ? obj : { default: obj };
-}
-
 function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
         throw new TypeError("Cannot call a class as a function");
@@ -574,6 +559,7 @@ var Player = function (_Phaser$Sprite) {
         _this.jumpSound = _this.game.add.audio('jump');
         _this.maxLife = 3;
         _this.life = _this.maxLife;
+        _this.coins = 0;
         _this.bottleStock = {
             blue: 0,
             green: 0,
@@ -640,7 +626,6 @@ var Player = function (_Phaser$Sprite) {
     }, {
         key: 'hitBottle',
         value: function hitBottle(_player, _bottle) {
-            console.log(_bottle.frame);
             switch (_bottle.frame) {
                 case 0:
                     if (_player.bottleStock.blue < _player.bottleStock.max) {
@@ -674,7 +659,7 @@ var Player = function (_Phaser$Sprite) {
         key: 'hitCoin',
         value: function hitCoin(_player, _coin) {
             _coin.onHit();
-            this.score += 1 * this.scoreMultiplicateur;
+            _player.coins += 1;
         }
     }]);
 
@@ -683,7 +668,7 @@ var Player = function (_Phaser$Sprite) {
 
 exports.default = Player;
 
-},{"./Coin":5}],9:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -845,9 +830,8 @@ var EndlessRunner = function (_Phaser$State) {
     _createClass(EndlessRunner, [{
         key: 'preload',
         value: function preload() {
-            this.game.load.path = 'assets/';
+            this.load.path = "assets/";
             this.game.load.atlas('samourai', 'img/player.png', 'data/player.json');
-
             this.game.load.image('sky', 'img/sky.png');
             this.game.load.image('mountain', 'img/mountain.png');
             this.game.load.image('rolling_barrel', 'img/rolling_barrel.png');
@@ -867,6 +851,8 @@ var EndlessRunner = function (_Phaser$State) {
     }, {
         key: 'create',
         value: function create() {
+            var _this2 = this;
+
             // ---- global params ---- //
             this.score = 0;
             this.scoreMultiplicateur = 1;
@@ -887,8 +873,9 @@ var EndlessRunner = function (_Phaser$State) {
             this.floors.enableBody = true;
             this.floors.body.immovable = true;
 
-            this.scoreText = this.game.add.text(this.game.world.width / 2, 16, '', { fontSize: '32px', fill: '#000' });
+            this.scoreText = this.game.add.text(this.game.world.width / 2, 16, this.score, { fontSize: '32px', fill: '#000' });
             this.scoreText.anchor.setTo(.5, 0);
+
             this.blue_jar = this.game.add.sprite(this.game.world.width - 192, 16, 'blue_jar');
             this.green_jar = this.game.add.sprite(this.game.world.width - 144, 16, 'green_jar');
             this.red_jar = this.game.add.sprite(this.game.world.width - 96, 16, 'red_jar');
@@ -902,7 +889,6 @@ var EndlessRunner = function (_Phaser$State) {
 
             // -- barrels
             this.game.GLOBAL.barrels = this.game.add.group();
-            this.game.GLOBAL.barrels.enableBody = true;
 
             // -- coins
             this.game.GLOBAL.coins = this.game.add.group();
@@ -917,6 +903,9 @@ var EndlessRunner = function (_Phaser$State) {
             for (var i = 0; i < this.player.maxLife; i++) {
                 this.arrayLife[i] = this.game.add.sprite(16 + i * 24, 16, 'lifeBar');
             }
+
+            this.coinsText = this.game.add.text(16, 48, this.player.coins, { fontSize: '32px', fill: '#FCFA22' });
+
             // ---- EVENTS ---- //
             var spaceKey = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
             spaceKey.onDown.add(this.player.jump, this.player);
@@ -932,7 +921,11 @@ var EndlessRunner = function (_Phaser$State) {
             var key3 = this.game.input.keyboard.addKey(Phaser.Keyboard.THREE);
             key3.onDown.add(this.player.useBottle, this);
 
-            this.timer = this.game.time.events.loop(1750, this.generateObstacle, this);
+            this.timer = this.game.time.events.loop(2000, this.generateObstacle, this);
+
+            this.timerIncreaseScore = this.game.time.events.loop(2000, function () {
+                return _this2.score += 1;
+            }, this);
         }
     }, {
         key: 'update',
@@ -965,7 +958,7 @@ var EndlessRunner = function (_Phaser$State) {
             this.bg_mountain.tilePosition.x -= 1;
             this.floors.tilePosition.x -= 2.5;
             this.game.GLOBAL.barrels.forEach(function (item) {
-                return item.angle -= 2;
+                return item.angle -= 1;
             });
 
             this.updateInfo();
@@ -1010,6 +1003,7 @@ var EndlessRunner = function (_Phaser$State) {
         key: 'updateInfo',
         value: function updateInfo() {
             this.scoreText.text = this.score;
+            this.coinsText.text = this.player.coins;
             for (var i = 0; i < this.arrayLife.length; i++) {
                 this.arrayLife[i].frame = i + 1 <= this.player.life ? 0 : 1;
             }
@@ -1036,7 +1030,7 @@ var EndlessRunner = function (_Phaser$State) {
         value: function addBarrels() {
             var posY = this.game.height - 128;
             var rand = Math.floor(Math.random() * 128) + 1;
-            new _Barrel2.default(this.game, this.game.width, posY - rand, 'rolling_barrel');
+            new _Barrel2.default(this.game, this.game.width, posY - rand);
         }
     }, {
         key: 'addCrate',
@@ -1118,7 +1112,7 @@ var Menu = function (_Phaser$State) {
     _createClass(Menu, [{
         key: 'preload',
         value: function preload() {
-            this.game.load.path = 'assets/';
+            this.load.path = "assets/";
             this.game.load.image('sky', 'img/sky.png');
             this.game.load.image('mountain', 'img/mountain.png');
             this.game.load.image('runnerButton', 'img/menu/runnerButton.png');

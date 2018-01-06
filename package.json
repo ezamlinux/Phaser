@@ -8,7 +8,9 @@
   },
   "scripts": {
     "start": "node server.js",
-    "test": "gulp build"
+    "production": "gulp --production",
+    "build": "gulp build",
+    "serve": "gulp serve"
   },
   "author": "Sanctorum Thomas",
   "license": "MIT",
