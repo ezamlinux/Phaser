@@ -11,8 +11,6 @@ app.set('port', (process.env.PORT || 3000));
 app.use(express.static(__dirname + '/build'));
 
 io.on('connection', socket => {
-    console.log('Player Connected');
-
     socket.on('getData', callback => {
         db.getDeadList()
             .then(data => callback(data));

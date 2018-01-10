@@ -35,7 +35,10 @@ class Provider{
                     obj.list.push(_player);
                 }
                 obj = JSON.stringify(obj);
-                fs.writeFile(this.path, obj, 'utf8', data => resolve(data));
+                fs.writeFile(this.path, obj, 'utf8', err => {
+                    if(err) reject(err);
+                    resolve(obj);
+                    });
             })
         })
     }
