@@ -6481,12 +6481,13 @@ var ioClient = function () {
             this.socket = (0, _socket2.default)();
             this.list;
             this.socket.on('update', function (data) {
-                console.log('updated');
+                console.log('data updated');
                 var obj = JSON.parse(data);
                 _this.list = obj.list;
             });
             this.getData();
             instance = this;
+            console.log(this.socket);
         }
         return instance;
     }
@@ -6504,7 +6505,6 @@ var ioClient = function () {
     }, {
         key: 'playerDead',
         value: function playerDead(data) {
-            console.log('player is dead', data);
             this.socket.emit('dead', data);
         }
     }]);
