@@ -13,6 +13,7 @@ class Provider{
     getDeadList(){
         return new Promise( (resolve, reject) => {
             fs.readFile(this.path, 'utf8', (err, data) => {
+                console.log(data);
                 return err ? reject(err) : resolve(data);
             })
         })
@@ -36,6 +37,7 @@ class Provider{
                 }
                 obj = JSON.stringify(obj);
                 fs.writeFile(this.path, obj, 'utf8', err => {
+                    console.log('updated')
                     if(err) reject(err);
                     resolve(obj);
                     });
