@@ -6438,7 +6438,7 @@ var Game = function (_Phaser$Game) {
 
 new Game();
 
-},{"states/EndlessRunner":53,"states/Menu":54}],43:[function(require,module,exports){
+},{"states/EndlessRunner":54,"states/Menu":55}],43:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -6481,13 +6481,10 @@ var ioClient = function () {
             this.socket = (0, _socket2.default)();
             this.list;
             this.socket.on('update', function (data) {
-                console.log('data updated');
-                var obj = JSON.parse(data);
-                _this.list = obj.list;
+                return _this.list = data;
             });
             this.getData();
             instance = this;
-            console.log(this.socket);
         }
         return instance;
     }
@@ -6498,9 +6495,13 @@ var ioClient = function () {
             var _this2 = this;
 
             this.socket.emit('getData', function (data) {
-                var obj = JSON.parse(data);
-                _this2.list = obj.list;
+                return _this2.list = data;
             });
+        }
+    }, {
+        key: 'playerHitKatana',
+        value: function playerHitKatana(_katana) {
+            this.socket.emit('deleteKatana', _katana.id);
         }
     }, {
         key: 'playerDead',
@@ -6991,6 +6992,151 @@ var _createClass = function () {
     };
 }();
 
+var _RegularCrate = require('./RegularCrate');
+
+var _RegularCrate2 = _interopRequireDefault(_RegularCrate);
+
+var _BottleCrate = require('./BottleCrate');
+
+var _BottleCrate2 = _interopRequireDefault(_BottleCrate);
+
+var _CoinCrate = require('./CoinCrate');
+
+var _CoinCrate2 = _interopRequireDefault(_CoinCrate);
+
+var _Barrel = require('./Barrel');
+
+var _Barrel2 = _interopRequireDefault(_Barrel);
+
+var _Katana = require('./Katana');
+
+var _Katana2 = _interopRequireDefault(_Katana);
+
+var _Socket = require('io/Socket');
+
+var _Socket2 = _interopRequireDefault(_Socket);
+
+function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : { default: obj };
+}
+
+function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+        throw new TypeError("Cannot call a class as a function");
+    }
+}
+
+var GameGen = function () {
+    function GameGen(_game) {
+        _classCallCheck(this, GameGen);
+
+        // 1 = Regular Crate , 2 = Barrels, 3 = CoinCrate  
+        this.patterns = [[1, 1, 1, 1, 1], [2, 2, 2, 2, 2], [3, 3, 3, 3, 3], [1, 2, 1, 2, 1]];
+        this.currentPattern;
+        this.index = 0;
+        this.game = _game;
+        this.posY = this.game.height - 128;
+    }
+
+    _createClass(GameGen, [{
+        key: 'generateObstacle',
+        value: function generateObstacle(_score) {
+            var katanaMatch = false;
+            if (_Socket2.default.list) {
+                for (var i in _Socket2.default.list) {
+                    var item = _Socket2.default.list[i];
+                    if (item.score == _score) {
+                        katanaMatch = true;
+                        this.addKatana({ 'coins': item.coins, 'id': item._id });
+                    }
+                }
+            }
+
+            if (!katanaMatch) {
+                if (!this.currentPattern) {
+                    this.currentPattern = this.rand(this.patterns.length) - 1;
+                }
+                this.followPattern();
+            }
+        }
+    }, {
+        key: 'followPattern',
+        value: function followPattern() {
+            var index = this.patterns[this.currentPattern][this.index];
+            console.log(this.patterns[this.currentPattern], this.index);
+            switch (index) {
+                case 1:
+                    this.addCrate();
+                    break;
+                case 2:
+                    this.addBarrels();
+                    break;
+                case 3:
+                    this.addCrate();
+                    break;
+            }
+            if (this.patterns[this.currentPattern][this.index + 1] == undefined) {
+                this.currentPattern = this.rand(this.patterns.length) - 1;
+                this.index = 0;
+            } else {
+                this.index += 1;
+            }
+        }
+    }, {
+        key: 'rand',
+        value: function rand(_x) {
+            return Math.floor(Math.random() * _x) + 1;
+        }
+    }, {
+        key: 'addKatana',
+        value: function addKatana(_data) {
+            new _Katana2.default(this.game, this.game.width, this.posY, _data.coins, _data.id);
+        }
+    }, {
+        key: 'addBarrels',
+        value: function addBarrels() {
+            var rand = this.rand(128);
+            new _Barrel2.default(this.game, this.game.width, this.posY - rand);
+        }
+    }, {
+        key: 'addCrate',
+        value: function addCrate() {
+            var rand = this.rand(10);
+            var value = this.rand(10) > 5 ? 96 : 0;
+            if (rand >= 9) {
+                if (this.rand(10) >= 5) {
+                    new _CoinCrate2.default(this.game, this.game.width, this.posY - value);
+                } else {
+                    new _BottleCrate2.default(this.game, this.game.width, this.posY - value);
+                }
+            } else {
+                new _RegularCrate2.default(this.game, this.game.width, this.posY);
+            }
+        }
+    }]);
+
+    return GameGen;
+}();
+
+exports.default = GameGen;
+
+},{"./Barrel":44,"./BottleCrate":46,"./CoinCrate":48,"./Katana":51,"./RegularCrate":53,"io/Socket":43}],51:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () {
+    function defineProperties(target, props) {
+        for (var i = 0; i < props.length; i++) {
+            var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
+        }
+    }return function (Constructor, protoProps, staticProps) {
+        if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
+    };
+}();
+
 function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
         throw new TypeError("Cannot call a class as a function");
@@ -7012,13 +7158,14 @@ function _inherits(subClass, superClass) {
 var Katana = function (_Phaser$Sprite) {
     _inherits(Katana, _Phaser$Sprite);
 
-    function Katana(game, x, y, _coins) {
+    function Katana(game, x, y, _coins, _id) {
         _classCallCheck(this, Katana);
 
         var _this = _possibleConstructorReturn(this, (Katana.__proto__ || Object.getPrototypeOf(Katana)).call(this, game, x, y, 'katana'));
 
         _this.game.physics.arcade.enable(_this);
         _this.coins = _coins;
+        _this._id = _id;
         _this.body.velocity.x = -200;
         _this.checkWorldBounds = true;
         _this.outOfBoundsKill = true;
@@ -7041,7 +7188,7 @@ var Katana = function (_Phaser$Sprite) {
 
 exports.default = Katana;
 
-},{}],51:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -7203,6 +7350,7 @@ var Player = function (_Phaser$Sprite) {
         key: 'hitKatana',
         value: function hitKatana(_player, _katana) {
             _player.coins += _katana.coins;
+            _Socket2.default.playerHitKatana(_katana);
             _katana.onHit();
         }
     }]);
@@ -7212,7 +7360,7 @@ var Player = function (_Phaser$Sprite) {
 
 exports.default = Player;
 
-},{"io/Socket":43}],52:[function(require,module,exports){
+},{"io/Socket":43}],53:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -7303,7 +7451,7 @@ var RegularCrate = function (_Crate) {
 
 exports.default = RegularCrate;
 
-},{"objects/Crate":49}],53:[function(require,module,exports){
+},{"objects/Crate":49}],54:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -7324,25 +7472,9 @@ var _Player = require('objects/Player');
 
 var _Player2 = _interopRequireDefault(_Player);
 
-var _RegularCrate = require('objects/RegularCrate');
+var _GameGen = require('objects/GameGen');
 
-var _RegularCrate2 = _interopRequireDefault(_RegularCrate);
-
-var _BottleCrate = require('objects/BottleCrate');
-
-var _BottleCrate2 = _interopRequireDefault(_BottleCrate);
-
-var _CoinCrate = require('objects/CoinCrate');
-
-var _CoinCrate2 = _interopRequireDefault(_CoinCrate);
-
-var _Barrel = require('objects/Barrel');
-
-var _Barrel2 = _interopRequireDefault(_Barrel);
-
-var _Katana = require('objects/Katana');
-
-var _Katana2 = _interopRequireDefault(_Katana);
+var _GameGen2 = _interopRequireDefault(_GameGen);
 
 var _Socket = require('io/Socket');
 
@@ -7404,6 +7536,8 @@ var EndlessRunner = function (_Phaser$State) {
     }, {
         key: 'create',
         value: function create() {
+            var _this2 = this;
+
             // ---- global params ---- //
             this.scoreMultiplicateur = 1;
             // ---- ----//
@@ -7450,6 +7584,7 @@ var EndlessRunner = function (_Phaser$State) {
 
             // -- function -- //
             this.player = new _Player2.default(this.game);
+            this.gameGen = new _GameGen2.default(this.game);
             this.arrayLife = [];
 
             for (var i = 0; i < this.player.maxLife; i++) {
@@ -7473,11 +7608,15 @@ var EndlessRunner = function (_Phaser$State) {
             var key3 = this.game.input.keyboard.addKey(Phaser.Keyboard.THREE);
             key3.onDown.add(this.player.useBottle, this);
 
-            this.timer = this.game.time.events.loop(2000, this.generateObstacle, this);
+            this.timer = this.game.time.events.loop(2000, function () {
+                _this2.player.score += 1;
+                _this2.gameGen.generateObstacle(_this2.player.score);
+            }, this.gameGen);
         }
     }, {
         key: 'update',
         value: function update() {
+            this.updateHUD();
             // -- floor collide
             this.game.physics.arcade.collide(this.floors, this.player);
             this.game.physics.arcade.collide(this.floors, this.game.GLOBAL.coins);
@@ -7511,7 +7650,6 @@ var EndlessRunner = function (_Phaser$State) {
                 return item.angle -= 1;
             });
 
-            this.updateInfo();
             // -- player event
             if (this.cursors.right.isDown) {
                 if (this.player.body.touching.down) {
@@ -7548,8 +7686,8 @@ var EndlessRunner = function (_Phaser$State) {
             }
         }
     }, {
-        key: 'updateInfo',
-        value: function updateInfo() {
+        key: 'updateHUD',
+        value: function updateHUD() {
             this.scoreText.text = this.player.score;
             this.coinsText.text = this.player.coins;
             for (var i = 0; i < this.arrayLife.length; i++) {
@@ -7559,63 +7697,6 @@ var EndlessRunner = function (_Phaser$State) {
             this.red_jar.frame = this.player.bottleStock.red;
             this.blue_jar.frame = this.player.bottleStock.blue;
             this.yellow_jar.frame = this.player.bottleStock.yellow;
-        }
-    }, {
-        key: 'generateObstacle',
-        value: function generateObstacle() {
-            this.player.score += 1;
-            var katanaMatch = false;
-            if (_Socket2.default.list) {
-                for (var i in _Socket2.default.list) {
-                    var item = _Socket2.default.list[i];
-                    if (item.score == this.player.score) {
-                        katanaMatch = true;
-                        this.addKatana(item.coins);
-                    }
-                }
-            }
-
-            if (!katanaMatch) {
-                var seed = Math.floor(Math.random() * 10) + 1;
-                if (seed < 8) {
-                    this.addCrate();
-                } else if (seed >= 8 && seed != 10) {
-                    this.addBarrels();
-                }
-            }
-        }
-
-        // -- adding
-
-    }, {
-        key: 'addKatana',
-        value: function addKatana(_coins) {
-            var posY = this.game.height - 128;
-            new _Katana2.default(this.game, this.game.width, posY, _coins);
-        }
-    }, {
-        key: 'addBarrels',
-        value: function addBarrels() {
-            var posY = this.game.height - 128;
-            var rand = Math.floor(Math.random() * 128) + 1;
-            new _Barrel2.default(this.game, this.game.width, posY - rand);
-        }
-    }, {
-        key: 'addCrate',
-        value: function addCrate() {
-            var rand = Math.floor(Math.random() * 10) + 1;
-            var posY = this.game.height - 128;
-            var value = Math.floor(Math.random() * 10) + 1 > 5 ? 96 : 0;
-            if (rand >= 9) {
-                var _rand = Math.floor(Math.random() * 10) + 1;
-                if (_rand >= 5) {
-                    new _CoinCrate2.default(this.game, this.game.width, posY - value);
-                } else {
-                    new _BottleCrate2.default(this.game, this.game.width, posY - value);
-                }
-            } else {
-                new _RegularCrate2.default(this.game, this.game.width, posY);
-            }
         }
 
         // -- HITTER
@@ -7633,7 +7714,7 @@ var EndlessRunner = function (_Phaser$State) {
 
 exports.default = EndlessRunner;
 
-},{"io/Socket":43,"objects/Barrel":44,"objects/BottleCrate":46,"objects/CoinCrate":48,"objects/Katana":50,"objects/Player":51,"objects/RegularCrate":52}],54:[function(require,module,exports){
+},{"io/Socket":43,"objects/GameGen":50,"objects/Player":52}],55:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {

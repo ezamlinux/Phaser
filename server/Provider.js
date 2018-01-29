@@ -1,47 +1,47 @@
-const fs = require('fs');
+const mongoose = require('mongoose');
+const Souls = require('./Schema/Souls');
+var db = mongoose.connect('mongodb://localhost:27017/test', err => {
+    if(err) throw err;
+});
+
 let instance;
 
 class Provider{
     constructor(){
         if(!instance){
-            this.path = __dirname + '\\deadList.json'
             instance = this;
         }
         return instance;
     }
 
-    getDeadList(){
-        return new Promise( (resolve, reject) => {
-            fs.readFile(this.path, 'utf8', (err, data) => {
-                console.log(data);
-                return err ? reject(err) : resolve(data);
-            })
+    getData(){
+        return new Promise((resolve, reject) =>{
+            Souls.find()
+                .then(data => resolve(data))
+                .catch(err =>  reject(err))
+        })
+
+    }
+    remove(p_id){
+        return new Promise((resolve, reject) => {
+            Souls.findOneAndRemove({ _id : p_id})
+                .then(() => Souls.find())
+                    .then(data => resolve(data))
+                    .catch(err => reject(err))
+                .catch(err => reject(err))
         })
     }
-
-    addDead(_player){
-        return new Promise( (resolve, reject) => {
-            fs.readFile(this.path, 'utf8', (err, data) => {
-                if(err) reject(err);
-                let obj = JSON.parse(data);
-                let replace = false;
-                for(let i in obj.list){
-                    let item = obj.list[i];
-                    if(item.score == _player.score){
-                        replace = true;
-                        item.coins += _player.coins;
-                    } 
-                }
-                if(!replace){
-                    obj.list.push(_player);
-                }
-                obj = JSON.stringify(obj);
-                fs.writeFile(this.path, obj, 'utf8', err => {
-                    console.log('updated')
-                    if(err) reject(err);
-                    resolve(obj);
-                    });
+    add(_player){
+        return new Promise (( resolve, reject) => {
+            let obj = new Souls({
+                'score': _player.score,
+                'coins': _player.coins
             })
+            obj.save()
+                .then(() => Souls.find())
+                    .then(data => resolve(data))
+                    .catch(err => reject(err))
+                .catch(err => reject(err));
         })
     }
 }
