@@ -1,5 +1,5 @@
-class Crate extends Phaser.Sprite{
-    constructor(game, x, y, group, _frame){
+class Crate extends Phaser.Sprite {
+    constructor (game, x, y, group, _frame) {
         super(game, x, y, 'crates');
 
         this.game.physics.arcade.enable(this);
@@ -12,12 +12,9 @@ class Crate extends Phaser.Sprite{
         group.add(this);
     }
 
-    onHit(_crate, _player){
-        if(_player && _player.key == 'samourai'){ 
-            if(_player.body.touching.down && _crate.body.touching.up){
-            }else {
-                _crate.kill();
-            }
+    onHit (_crate, _player) {
+        if (_player && _player.key == 'samourai' && ! (_player.body.touching.down && _crate.body.touching.up)) {
+            _crate.kill();
         }
     }
 }

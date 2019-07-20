@@ -1,5 +1,5 @@
-class Barrel extends Phaser.Sprite{
-    constructor(game, x, y, img){
+class Barrel extends Phaser.Sprite {
+    constructor (game, x, y) {
         super(game, x, y, 'rolling_barrel');
 
         this.game.physics.arcade.enable(this);
@@ -14,13 +14,10 @@ class Barrel extends Phaser.Sprite{
         this.game.GLOBAL.barrels.add(this);
     }
 
-    onHit(_barrel, _player){
-        if(_player && _player.key == 'samourai'){ 
-            if(_player.body.touching.down && _barrel.body.touching.up){
-            }else {
-                _player.getDamage(1);
-                _barrel.kill();
-            }
+    onHit (_barrel, _player) {
+        if (_player && _player.key == 'samourai' && ! (_player.body.touching.down && _barrel.body.touching.up)) {
+            _player.getDamage(1);
+            _barrel.kill();
         }
     }
 }

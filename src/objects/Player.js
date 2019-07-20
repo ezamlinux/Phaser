@@ -1,10 +1,8 @@
-import ioClient from 'io/Socket'
-
 class Player extends Phaser.Sprite {
-	constructor(game){
-        super(game, 32, game.world.height - 200, 'samourai');   
+    constructor (game) {
+        super(game, 32, game.world.height - 200, 'samourai');
 
-        this.game.physics.arcade.enable(this);      
+        this.game.physics.arcade.enable(this);
         this.jumpSound = this.game.add.audio('jump');
         this.maxLife = 3;
         this.life = this.maxLife;
@@ -31,71 +29,70 @@ class Player extends Phaser.Sprite {
         this.game.world.addChild(this);
     }
 
-    jump(){
-        if(this.body.blocked.down || this.body.touching.down){    
+    jump () {
+        if (this.body.blocked.down || this.body.touching.down) {
             this.jumpSound.play();
-            this.animations.play('jump');     
-            this.body.velocity.y = -500; 
+            this.animations.play('jump');
+            this.body.velocity.y = -500;
         }
     }
 
-    getDamage(_x){
+    getDamage (_x) {
         this.life -= _x;
-        if(this.life == 0){
-            ioClient.playerDead({'coins': this.coins, "score": this.score});
+        if (this.life == 0) {
             this.game.GLOBAL.themeMusic.stop();
             this.game.state.start('menu');
         }
     }
 
-    useBottle(_bottle) {
-        if(_bottle.keyCode == 49){
-            if(this.player.bottleStock.green == this.player.bottleStock.max && this.player.life < this.player.maxLife){
+    useBottle (_bottle) {
+        if (_bottle.keyCode == 49) {
+            if (this.player.bottleStock.green == this.player.bottleStock.max && this.player.life < this.player.maxLife) {
                 this.player.life += 1 ;
                 this.player.bottleStock.green = 0;
             }
         }
 
-        else if(_bottle.keyCode == 50){
-            if (this.player.bottleStock.red == this.player.bottleStock.max && this.player.life < this.player.maxLife ){
+        else if (_bottle.keyCode == 50) {
+            if (this.player.bottleStock.red == this.player.bottleStock.max && this.player.life < this.player.maxLife) {
                 this.player.life = this.player.maxLife;
                 this.player.bottleStock.red = 0;
             }
         }
 
-        else if(_bottle.keyCode == 51){
-            if(this.player.bottleStock.yellow == this.player.bottleStock.max){            
+        else if (_bottle.keyCode == 51) {
+            if (this.player.bottleStock.yellow == this.player.bottleStock.max) {
                 this.player.maxLife += 1;
-                this.arrayLife[this.arrayLife.length] = this.game.add.sprite(16 + ( this.arrayLife.length * 24 ), 16, 'lifeBar');
+                this.arrayLife[this.arrayLife.length] = this.game.add.sprite(16 + (this.arrayLife.length * 24), 16, 'lifeBar');
                 this.player.life = this.player.maxLife;
                 this.player.bottleStock.yellow = 0;
             }
         }
     }
 
-    hitBottle(_player, _bottle){
-        switch(_bottle.frame){
+    hitBottle (_player, _bottle) {
+        switch (_bottle.frame) {
             case 0:
-                if( _player.bottleStock.blue <  _player.bottleStock.max) {  
+                if (_player.bottleStock.blue < _player.bottleStock.max) {
                     _player.bottleStock.blue += 1;
-                    if( _player.bottleStock.blue ==  _player.bottleStock.max) {
+                    if (_player.bottleStock.blue == _player.bottleStock.max) {
                         this.scoreMultiplicateur += 1;
                         _player.bottleStock.blue = 0;
                     }
-                } 
+                }
                 break;
             case 1:
-                if(_player.bottleStock.green < _player.bottleStock.max){  
+                if (_player.bottleStock.green < _player.bottleStock.max) {
                     _player.bottleStock.green += 1;
                 }
                 break;
             case 2:
-                if(_player.bottleStock.red <  _player.bottleStock.max){  
+                if (_player.bottleStock.red < _player.bottleStock.max) {
                     _player.bottleStock.red += 1;
                 }
                 break;
             case 3:
-                if( _player.bottleStock.yellow <  _player.bottleStock.max){  
+                if (_player.bottleStock.yellow < _player.bottleStock.max) {
                     _player.bottleStock.yellow += 1;
                 }
                 break;
@@ -104,12 +101,12 @@ class Player extends Phaser.Sprite {
         _bottle.onHit();
     }
 
-    hitCoin(_player, _coin){
+    hitCoin (_player, _coin) {
         _coin.onHit();
         _player.coins += 1;
     }
 
-    hitKatana(_player, _katana){
+    hitKatana (_player, _katana) {
         _player.coins += _katana.coins;
         ioClient.playerHitKatana(_katana);
         _katana.onHit();

@@ -1,0 +1,85 @@
+{
+    "extends": "eslint:recommended",
+    "env": {
+        "browser": true,
+        "commonjs": true,
+        "es6": true
+    },
+    "parserOptions": {
+        "sourceType": "module"
+    },
+    "rules": {
+        "no-undef": [
+            0
+        ],
+        "comma-spacing": [
+            1,
+            {
+                "before": false,
+                "after": true
+            }
+        ],
+        "no-multi-spaces": 1,
+        "indent": [
+            2,
+            4,
+            {
+                "SwitchCase": 1
+            }
+        ],
+        "no-warning-comments": [
+            1,
+            {
+                "terms": [
+                    "@todo",
+                    "todo",
+                    "fixme",
+                    "xxx"
+                ],
+                "location": "start"
+            }
+        ],
+        "no-unused-vars": [
+            2,
+            {
+                "vars": "local",
+                "args": "after-used",
+                "ignoreRestSiblings": false
+            }
+        ],
+        "no-console": [
+            2,
+            {
+                "allow": [
+                    "warn",
+                    "error"
+                ]
+            }
+        ],
+        "quotes": [
+            1,
+            "single",
+            {
+                "avoidEscape": true
+            }
+        ],
+        "no-trailing-spaces": [
+            1
+        ],
+        "yoda": 1,
+        "no-lonely-if": 2,
+        "space-before-blocks": 1,
+        "space-before-function-paren": 1,
+        "keyword-spacing": [
+            1,
+            {
+                "before": true,
+                "after": true
+            }
+        ],
+        "space-in-parens": [
+            1,
+            "never"
+        ]
+    }
+}

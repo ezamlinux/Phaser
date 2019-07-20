@@ -1,5 +1,5 @@
-class Coin extends Phaser.Sprite{
-    constructor(game, x, y){
+class Coin extends Phaser.Sprite {
+    constructor (game, x, y) {
         super(game, x, y, 'ring');
         this.game.physics.arcade.enable(this);
         this.coinSound = this.game.add.audio('coin');
@@ -13,8 +13,8 @@ class Coin extends Phaser.Sprite{
         this.game.GLOBAL.coins.add(this);
     }
 
-    onHit(){
-        this.coinSound.play();   
+    onHit () {
+        this.coinSound.play();
         this.kill();
     }
 }

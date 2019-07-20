@@ -1,13 +1,13 @@
-class Menu extends Phaser.State{
-    preload(){
-        this.load.path = "assets/";
+class Menu extends Phaser.State {
+    preload () {
+        this.load.path = 'assets/';
         this.game.load.image('sky', 'img/sky.png');
         this.game.load.image('mountain', 'img/mountain.png');
         this.game.load.image('runnerButton', 'img/menu/runnerButton.png');
         this.game.load.audio('rain', 'audio/rain.wav');
     }
 
-    create(){
+    create () {
         this.bg_sky = this.game.add.tileSprite(0, 0, this.game.world.width, this.game.world.height, 'sky');
         this.bg_mountain= this.game.add.tileSprite(0, 0, this.game.world.width, this.game.world.height, 'mountain')
 
@@ -24,14 +24,14 @@ class Menu extends Phaser.State{
         this.game.GLOBAL.themeMusic.play();
     }
 
-    update(){
+    update () {
         this.bg_sky.tilePosition.x -= 0.20;
         this.bg_mountain.tilePosition.x -= 1;
     }
-    
-    launchEndlessRunner(){
+
+    launchEndlessRunner () {
         this.game.GLOBAL.themeMusic.stop();
-		this.game.state.start('endlessRunner');
+        this.game.state.start('endlessRunner');
     }
 }
 
