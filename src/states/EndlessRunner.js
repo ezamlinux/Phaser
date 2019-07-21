@@ -8,12 +8,11 @@ class EndlessRunner extends Phaser.State {
         this.game.load.image('sky', 'img/sky.png');
         this.game.load.image('mountain', 'img/mountain.png');
         this.game.load.image('rolling_barrel', 'img/rolling_barrel.png');
-        this.game.load.image('katana', 'img/brokenKatana.png');
         this.game.load.spritesheet('flasks', 'img/Flasks.png', 24, 24);
         this.game.load.spritesheet('crates', 'img/Crates.png', 64, 64);
         this.game.load.image('ring', 'img/ring.png');
         this.game.load.image('grass', 'img/grass.png');
-        this.game.load.spritesheet('lifeBar', 'img/lifeBar.png', 16, 32);
+        this.game.load.spritesheet('life_bar', 'img/life_bar.png', 16, 8);
         this.game.load.spritesheet('green_jar', 'img/green_jar.png', 32, 32);
         this.game.load.spritesheet('red_jar', 'img/red_jar.png', 32, 32);
         this.game.load.spritesheet('yellow_jar', 'img/yellow_jar.png', 32, 32);
@@ -30,8 +29,7 @@ class EndlessRunner extends Phaser.State {
         this.game.physics.startSystem(Phaser.Physics.ARCADE);
         this.cursors = this.game.input.keyboard.createCursorKeys();
 
-        this.game.GLOBAL.themeMusic = this.game.add.audio('taiko');
-        this.game.GLOBAL.themeMusic.loop = true;
+        this.game.GLOBAL.themeMusic = this.game.add.audio('taiko', 0.1, true);
         this.game.GLOBAL.themeMusic.play();
 
         this.game.stage.backgroundColor ='#000000';
@@ -65,16 +63,15 @@ class EndlessRunner extends Phaser.State {
         // -- bottles
         this.game.GLOBAL.bottles = this.game.add.group();
 
-        // -- Katana
-        this.game.GLOBAL.katana = this.game.add.group();
-
         // -- function -- //
         this.player = new Player(this.game);
         this.gameGen = new GameGen(this.game);
         this.arrayLife = [];
 
+        let posY = 16;
         for (let i = 0; i < this.player.maxLife; i++) {
-            this.arrayLife[i] = this.game.add.sprite(16 + (i * 24), 16, 'lifeBar');
+            let posX = 16 + (i * 20);
+            this.arrayLife[i] = this.game.add.sprite(posX, posY, 'life_bar');
         }
 
         this.coinsText = this.game.add.text(16, 48, this.player.coins, { fontSize: '32px', fill: '#FCFA22' });
@@ -110,7 +107,6 @@ class EndlessRunner extends Phaser.State {
         this.game.physics.arcade.collide(this.floors, this.game.GLOBAL.coinCrates);
         this.game.physics.arcade.collide(this.floors, this.game.GLOBAL.bottleCrates);
         this.game.physics.arcade.collide(this.floors, this.game.GLOBAL.barrels);
-        this.game.physics.arcade.collide(this.floors, this.game.GLOBAL.katana);
 
         // -- barrels collide
         this.game.physics.arcade.collide(this.game.GLOBAL.barrels, this.game.GLOBAL.crates, this.breakBoth, null, this);
@@ -123,7 +119,6 @@ class EndlessRunner extends Phaser.State {
         this.game.physics.arcade.collide(this.player, this.game.GLOBAL.bottleCrates, this.game.GLOBAL.bottleCrates.onHit, null, this);
         this.game.physics.arcade.collide(this.player, this.game.GLOBAL.coinCrates, this.game.GLOBAL.coinCrates.onHit, null, this);
         this.game.physics.arcade.collide(this.player, this.game.GLOBAL.barrels, this.game.GLOBAL.barrels.onHit, null, this);
-        this.game.physics.arcade.overlap(this.player, this.game.GLOBAL.katana, this.player.hitKatana, null, this);
         this.game.physics.arcade.overlap(this.player, this.game.GLOBAL.coins, this.player.hitCoin, null, this);
         this.game.physics.arcade.overlap(this.player, this.game.GLOBAL.bottles, this.player.hitBottle, null, this);
 

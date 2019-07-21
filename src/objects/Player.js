@@ -46,6 +46,7 @@ class Player extends Phaser.Sprite {
     }
 
     useBottle (_bottle) {
+        // 1
         if (_bottle.keyCode == 49) {
             if (this.player.bottleStock.green == this.player.bottleStock.max && this.player.life < this.player.maxLife) {
                 this.player.life += 1 ;
@@ -53,13 +54,14 @@ class Player extends Phaser.Sprite {
             }
         }
 
+        // 2
         else if (_bottle.keyCode == 50) {
             if (this.player.bottleStock.red == this.player.bottleStock.max && this.player.life < this.player.maxLife) {
                 this.player.life = this.player.maxLife;
                 this.player.bottleStock.red = 0;
             }
         }
-
+        // 3
         else if (_bottle.keyCode == 51) {
             if (this.player.bottleStock.yellow == this.player.bottleStock.max) {
                 this.player.maxLife += 1;
@@ -104,12 +106,6 @@ class Player extends Phaser.Sprite {
     hitCoin (_player, _coin) {
         _coin.onHit();
         _player.coins += 1;
-    }
-
-    hitKatana (_player, _katana) {
-        _player.coins += _katana.coins;
-        ioClient.playerHitKatana(_katana);
-        _katana.onHit();
     }
 }
 

@@ -18,9 +18,7 @@ class Menu extends Phaser.State {
         rKey.onDown.addOnce(this.launchEndlessRunner, this);
 
 
-        this.game.GLOBAL.themeMusic = this.game.add.audio('rain');
-        this.game.GLOBAL.themeMusic.loop = true;
-        this.game.GLOBAL.themeMusic.volume = 0.2;
+        this.game.GLOBAL.themeMusic = this.game.add.audio('rain', 0.1, true);
         this.game.GLOBAL.themeMusic.play();
     }
 
