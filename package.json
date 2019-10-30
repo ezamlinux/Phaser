@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "express": "^4.16.2",
-    "mongoose": "^5.0.1",
+    "mongoose": "^5.7.5",
     "phaser-ce": "^2.9.4",
     "socket.io": "^2.0.4",
     "socket.io-client": "^2.0.4"
