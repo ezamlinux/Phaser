@@ -30,7 +30,7 @@
     "yargs": "^4.6.0"
   },
   "dependencies": {
-    "express": "^4.16.2",
+    "express": "^4.17.3",
     "mongoose": "^5.7.5",
     "phaser-ce": "^2.9.4",
     "socket.io": "^2.4.1",
